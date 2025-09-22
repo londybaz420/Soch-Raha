@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝗔𝗦𝗧𝗥𝗜𝗫-𝗠𝗗 | Professional WhatsApp Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .orbitron {
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* Background Animation */
+        .animated-bg {
+            background: linear-gradient(45deg, #000428, #004e92, #009ffd, #00d2ff);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Stars Animation */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Neon Glow Effects */
+        .neon-blue {
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.5), 0 0 40px rgba(0, 191, 255, 0.3);
+        }
+
+        .neon-purple {
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5), 0 0 40px rgba(138, 43, 226, 0.3);
+        }
+
+        .neon-green {
+            box-shadow: 0 0 20px rgba(0, 255, 127, 0.5), 0 0 40px rgba(0, 255, 127, 0.3);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: transparent; }
+            51%, 100% { border-color: #00d2ff; }
+        }
+
+        /* Animation Classes */
+        .float { animation: float 6s ease-in-out infinite; }
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+        .shake-animation { animation: shake 0.5s ease-in-out; }
+        .fade-in-up { animation: fadeInUp 1s ease-out; }
+        .slide-in-left { animation: slideInLeft 1s ease-out; }
+        .slide-in-right { animation: slideInRight 1s ease-out; }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #000428, #004e92);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #00d2ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Typing Effect */
+        .typing-text {
+            overflow: hidden;
+            border-right: 3px solid #00d2ff;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end), blink 0.75s step-end infinite;
+        }
+
+        /* Hover Effects */
+        .hover-scale:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease;
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.6);
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        /* Scroll Animation */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Device Link Steps */
+        .step-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .typing-text {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body class="animated-bg min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="text-center">
+            <div class="loading-spinner mb-4"></div>
+            <h2 class="text-white text-xl orbitron">Loading ASTRIX-MD...</h2>
+        </div>
+    </div>
+
+    <!-- Background Stars -->
+    <div id="stars-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold orbitron text-white neon-blue">
+                    <i class="fas fa-robot mr-2"></i>ASTRIX-MD
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#home" class="text-white hover:text-blue-400 transition-colors">Home</a>
+                    <a href="#features" class="text-white hover:text-blue-400 transition-colors">Features</a>
+                    <a href="#device-link" class="text-white hover:text-blue-400 transition-colors">Device Link</a>
+                    <a href="#about" class="text-white hover:text-blue-400 transition-colors">About</a>
+                    <a href="#contact" class="text-white hover:text-blue-400 transition-colors">Contact</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobileMenu" class="text-white text-xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center px-4 pt-20">
+        <div class="container mx-auto text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-7xl font-bold orbitron text-white mb-6 fade-in-up">
+                    <span class="typing-text">ASTRIX-MD-MINI BOT </span>
+                </h1>
+                <p class="text-xl md:text-2xl text-blue-200 mb-8 slide-in-left">
+                    WhatsApp Bot with Advanced Features
+                </p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center slide-in-right">
+                    <a href="#device-link" class="btn-primary px-8 py-4 rounded-full text-white font-semibold hover-scale">
+                        <i class="fas fa-link mr-2"></i>Link Your Device
+                    </a>
+                    <a href="#features" class="glass px-8 py-4 rounded-full text-white font-semibold hover-scale">
+                        <i class="fas fa-star mr-2"></i>View Features
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4">
+        <div class="container mx-auto">
+            <h2 class="text-4xl font-bold orbitron text-white text-center mb-16 scroll-animate">
+                <i class="fas fa-magic mr-3 text-blue-400"></i>Bot Features
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass rounded-2xl p-8 text-center hover-scale scroll-animate">
+                    <div class="text-5xl mb-4 text-blue-400">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Media Downloader</h3>
+                    <p class="text-blue-200">Download videos, music, and images from various platforms</p>
+                </div>
+                <div class="glass rounded-2xl p-8 text-center hover-scale scroll-animate">
+                    <div class="text-5xl mb-4 text-purple-400">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Group Management</h3>
+                    <p class="text-blue-200">Advanced group administration and moderation tools</p>
+                </div>
+                <div class="glass rounded-2xl p-8 text-center hover-scale scroll-animate">
+                    <div class="text-5xl mb-4 text-green-400">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Fun Commands</h3>
+                    <p class="text-blue-200">Games, jokes, facts, and entertainment features</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Device Linking Section -->
+    <section id="device-link" class="py-20 px-4">
+        <div class="container mx-auto">
+            <h2 class="text-4xl font-bold orbitron text-white text-center mb-16 scroll-animate">
+                <i class="fas fa-mobile-alt mr-3 text-green-400"></i>Link Your Device
+            </h2>
+            
+            <!-- Pairing Code Generator -->
+            <div class="max-w-md mx-auto mb-16">
+                <div id="main-container" class="glass rounded-3xl p-8 neon-blue float">
+                    <div class="text-center mb-6">
+                        <div class="text-6xl mb-4 text-blue-400">
+                            <i class="fas fa-qrcode pulse"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold orbitron text-white mb-2">Get Pairing Code</h3>
+                        <p class="text-blue-200">Enter your WhatsApp number to get pairing code</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="relative">
+                            <input 
+                                id="number" 
+                                type="tel" 
+                                placeholder="Enter WhatsApp Number (with country code)"
+                                class="w-full p-4 rounded-xl bg-white bg-opacity-10 border border-white border-opacity-20 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                            >
+                            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            id="submit" 
+                            class="w-full btn-primary py-4 rounded-xl font-semibold text-white hover-glow"
+                        >
+                            <i class="fas fa-paper-plane mr-2"></i>Generate Code
+                        </button>
+                    </div>
+                    
+                    <div id="pair" class="text-center mt-6"></div>
+                </div>
+            </div>
+
+            <!-- How to Link Device Steps -->
+            <div class="max-w-4xl mx-auto">
+                <h3 class="text-3xl font-bold orbitron text-white text-center mb-12 scroll-animate">
+                    <i class="fas fa-list-ol mr-3 text-yellow-400"></i>How to Link Your Device
+                </h3>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Step 1 -->
+                    <div class="step-card rounded-2xl p-6 text-center scroll-animate">
+                        <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 neon-blue">
+                            <span class="text-2xl font-bold text-white">1</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-3">Open WhatsApp</h4>
+                        <p class="text-blue-200 text-sm">Open WhatsApp on your phone and go to Settings</p>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="step-card rounded-2xl p-6 text-center scroll-animate">
+                        <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 neon-purple">
+                            <span class="text-2xl font-bold text-white">2</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-3">Linked Devices</h4>
+                        <p class="text-blue-200 text-sm">Tap on "Linked Devices" option in settings</p>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="step-card rounded-2xl p-6 text-center scroll-animate">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 neon-green">
+                            <span class="text-2xl font-bold text-white">3</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-3">Link Device</h4>
+                        <p class="text-blue-200 text-sm">Tap "Link a Device" and choose "Link with phone number"</p>
+                    </div>
+                    
+                    <!-- Step 4 -->
+                    <div class="step-card rounded-2xl p-6 text-center scroll-animate">
+                        <div class="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4" style="box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);">
+                            <span class="text-2xl font-bold text-white">4</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-3">Enter Code</h4>
+                        <p class="text-blue-200 text-sm">Enter the pairing code generated above</p>
+                    </div>
+                </div>
+                
+                <!-- Important Notes -->
+                <div class="glass rounded-2xl p-8 mt-12 scroll-animate">
+                    <h4 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-3 text-yellow-400"></i>Important Notes
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-4 text-blue-200">
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle mr-3 text-green-400 mt-1"></i>
+                            <span>Use your WhatsApp number with country code</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle mr-3 text-green-400 mt-1"></i>
+                            <span>Pairing code expires in 30 seconds</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle mr-3 text-green-400 mt-1"></i>
+                            <span>Make sure you have stable internet connection</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-check-circle mr-3 text-green-400 mt-1"></i>
+                            <span>Your number must be verified on WhatsApp</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <h2 class="text-4xl font-bold orbitron text-white text-center mb-16 scroll-animate">
+                <i class="fas fa-info-circle mr-3 text-purple-400"></i>About ASTRIX-MD
+            </h2>
+            <div class="glass rounded-3xl p-10 scroll-animate">
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4 text-blue-400">
+                        <i class="fas fa-robot pulse"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Advanced WhatsApp Bot</h3>
+                    <p class="text-blue-200 leading-relaxed">
+                        ASTRIX-MD is a powerful and feature-rich WhatsApp bot designed to enhance your messaging experience. 
+                        Built with modern technology and packed with useful features, it's perfect for personal use, group management, 
+                        and entertainment purposes.
+                    </p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 mt-12">
+                    <div>
+                        <h4 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-star mr-3 text-yellow-400"></i>Key Features
+                        </h4>
+                        <ul class="text-blue-200 space-y-2">
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>Media downloading</li>
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>Group management</li>
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>Fun commands & games</li>
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>Auto-reply features</li>
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>Custom commands</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-shield-alt mr-3 text-green-400"></i>Security & Privacy
+                        </h4>
+                        <ul class="text-blue-200 space-y-2">
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>End-to-end encryption</li>
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>No data storage</li>
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>Privacy focused</li>
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>Secure pairing</li>
+                            <li class="flex items-center"><i class="fas fa-arrow-right mr-2 text-blue-400"></i>Regular updates</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 px-4">
+        <div class="container mx-auto max-w-2xl">
+            <h2 class="text-4xl font-bold orbitron text-white text-center mb-16 scroll-animate">
+                <i class="fas fa-envelope mr-3 text-red-400"></i>Contact Us
+            </h2>
+            <div class="glass rounded-3xl p-10 text-center scroll-animate">
+                <div class="text-6xl mb-6 text-blue-400">
+                    <i class="fas fa-headset pulse"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-6">Need Help?</h3>
+                <p class="text-blue-200 mb-8">
+                    Have questions or need assistance? Feel free to reach out to us through any of the following channels:
+                </p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <a href="#" class="glass px-6 py-3 rounded-full text-white hover-scale hover-glow">
+                        <i class="fab fa-whatsapp mr-2"></i>WhatsApp
+                    </a>
+                    <a href="#" class="glass px-6 py-3 rounded-full text-white hover-scale hover-glow">
+                        <i class="fab fa-telegram mr-2"></i>Telegram
+                    </a>
+                    <a href="#" class="glass px-6 py-3 rounded-full text-white hover-scale hover-glow">
+                        <i class="fab fa-github mr-2"></i>GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="glass py-8 px-4 mt-20">
+        <div class="container mx-auto text-center">
+            <div class="text-3xl font-bold orbitron text-white mb-4 neon-blue">
+                <i class="fas fa-robot mr-2"></i>ASTRIX-MD
+            </div>
+            <p class="text-blue-200 mb-4">Professional WhatsApp Bot Solution</p>
+            <div class="border-t border-white border-opacity-20 pt-4">
+                <p class="text-white font-semibold">
+                    <i class="fas fa-heart mr-2 text-red-400"></i>
+                    Made with ❤️ by <span class="orbitron text-blue-400 font-bold">ROMEK XD</span>
+                </p>
+                <p class="text-blue-200 text-sm mt-2">© 2024 ASTRIX-MD. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+    <script>
+        // Loading Screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }, 500);
+            }, 1500);
+        });
+
+        // Create animated stars
+        function createStars() {
+            const container = document.getElementById('stars-container');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                
+                container.appendChild(star);
+            }
+        }
+
+        // Smooth scrolling for navigation
+        function smoothScroll(target) {
+            document.querySelector(target).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Mobile menu toggle
+        document.getElementById('mobileMenu')?.addEventListener('click', function() {
+            // Mobile menu functionality can be added here
+        });
+
+        // Navigation smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // DOM elements
+        const numberInput = document.getElementById("number");
+        const submitBtn = document.getElementById("submit");
+        const pairDiv = document.getElementById("pair");
+        const mainContainer = document.getElementById("main-container");
+
+        // Enhanced copy function
+        async function Copy() {
+            const copyElement = document.getElementById("copy");
+            if (!copyElement) return;
+            
+            try {
+                const text = copyElement.innerText.replace('CODE: ', '');
+                await navigator.clipboard.writeText(text);
+                
+                const originalContent = copyElement.innerHTML;
+                copyElement.innerHTML = '<i class="fas fa-check mr-2"></i>ᴄᴏᴘɪᴇᴅ ✅';
+                copyElement.className = 'inline-block mt-6 px-6 py-3 bg-green-500 bg-opacity-20 rounded-xl border border-green-500 cursor-pointer transition-all hover:bg-opacity-30 neon-green';
+                
+                setTimeout(() => {
+                    copyElement.innerHTML = originalContent;
+                    copyElement.className = 'inline-block mt-6 px-6 py-3 glass rounded-xl cursor-pointer transition-all hover:bg-opacity-20 hover-glow';
+                }, 2000);
+            } catch (error) {
+                console.error('Copy failed:', error);
+            }
+        }
+
+        // Enhanced submit function with animations
+        submitBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            
+            // Add shake animation
+            mainContainer.classList.add('shake-animation');
+            setTimeout(() => mainContainer.classList.remove('shake-animation'), 500);
+            
+            const phoneNumber = numberInput.value.trim();
+            
+            if (!phoneNumber) {
+                pairDiv.innerHTML = `
+                    <div class="glass rounded-xl p-4 mt-4 border border-red-500">
+                        <div class="text-red-400 font-bold animate-pulse flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            ᴘʟᴇᴀsᴇ ᴇɴᴛᴇʀ ʏᴏᴜʀ ᴡʜᴀᴛsᴀᴘᴘ ɴᴜᴍʙᴇʀ
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const cleanNumber = phoneNumber.replace(/[^0-9]/g, "");
+            
+            if (cleanNumber.length < 10) {
+                pairDiv.innerHTML = `
+                    <div class="glass rounded-xl p-4 mt-4 border border-red-500">
+                        <div class="text-red-400 font-bold animate-pulse flex items-center justify-center">
+                            <i class="fas fa-times-circle mr-2"></i>
+                            ɪɴᴠᴀʟɪᴅ ɴᴜᴍʙᴇʀ ꜰᴏʀᴍᴀᴛ
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Update input display
+            numberInput.value = "+" + cleanNumber;
+            numberInput.classList.add('text-white', 'font-semibold');
+            
+            // Show loading state
+            pairDiv.innerHTML = `
+                <div class="glass rounded-xl p-6 mt-4 text-center">
+                    <div class="loading-spinner mx-auto mb-3" style="width: 30px; height: 30px; border-width: 3px;"></div>
+                    <div class="text-blue-300 font-bold animate-pulse">
+                        <i class="fas fa-cog fa-spin mr-2"></i>
+                        ɢᴇɴᴇʀᴀᴛɪɴɢ ᴘᴀɪʀɪɴɢ ᴄᴏᴅᴇ...
+                    </div>
+                </div>
+            `;
+            
+            try {
+                // API request
+                const response = await axios.get(`/code?number=${cleanNumber}`);
+                const code = response.data.code || "ꜱᴇʀᴠɪᴄᴇ ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ";
+                
+                // Success state with enhanced design
+                pairDiv.innerHTML = `
+                    <div class="glass rounded-xl p-6 mt-4 text-center border border-green-500 neon-green">
+                        <div class="text-green-400 mb-3">
+                            <i class="fas fa-check-circle text-2xl"></i>
+                        </div>
+                        <div class="text-white font-bold mb-4">Pairing Code Generated!</div>
+                        <div id="copy" onclick="Copy()" class="glass rounded-xl p-4 cursor-pointer transition-all hover:bg-opacity-20 hover-glow">
+                            <div class="text-blue-200 text-sm mb-1">Your Pairing Code:</div>
+                            <div class="text-3xl font-bold orbitron text-white tracking-wider">${code}</div>
+                            <div class="text-blue-300 text-xs mt-2">
+                                <i class="fas fa-copy mr-1"></i>Click to copy
+                            </div>
+                        </div>
+                        <div class="text-yellow-300 text-sm mt-4 flex items-center justify-center">
+                            <i class="fas fa-clock mr-2"></i>
+                            Code expires in 30 seconds
+                        </div>
+                    </div>
+                `;
+                
+                // Add success animation
+                setTimeout(() => {
+                    document.getElementById('copy')?.classList.add('pulse');
+                }, 100);
+                
+            } catch (error) {
+                // Error state
+                pairDiv.innerHTML = `
+                    <div class="glass rounded-xl p-4 mt-4 border border-red-500">
+                        <div class="text-red-400 font-bold animate-pulse flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            ᴇʀʀᴏʀ ɢᴇɴᴇʀᴀᴛɪɴɢ ᴄᴏᴅᴇ. ᴘʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        // Enter key support
+        numberInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
+        });
+
+        // Input formatting
+        numberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9+]/g, '');
+            if (value && !value.startsWith('+')) {
+                value = '+' + value;
+            }
+            e.target.value = value;
+        });
+
+        // Initialize animations and effects
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            
+            // Observe scroll animations
+            document.querySelectorAll('.scroll-animate').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Add random delays to animations
+            document.querySelectorAll('.fade-in-up, .slide-in-left, .slide-in-right').forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+
+        // Particle effect on click
+        function createParticles(x, y) {
+            for (let i = 0; i < 5; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.width = '4px';
+                particle.style.height = '4px';
+                particle.style.backgroundColor = '#00d2ff';
+                particle.style.borderRadius = '50%';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '9999';
+                
+                document.body.appendChild(particle);
+                
+                const angle = (Math.PI * 2 * i) / 5;
+                const velocity = 50;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                
+                let opacity = 1;
+                let posX = x;
+                let posY = y;
+                
+                const animate = () => {
+                    posX += vx * 0.1;
+                    posY += vy * 0.1;
+                    opacity -= 0.05;
+                    
+                    particle.style.left = posX + 'px';
+                    particle.style.top = posY + 'px';
+                    particle.style.opacity = opacity;
+                    
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        document.body.removeChild(particle);
+                    }
+                };
+                
+                animate();
+            }
+        }
+
+        // Add click effects to buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('button, .hover-scale, .hover-glow')) {
+                createParticles(e.clientX, e.clientY);
+            }
+        });
+
+        // Add typing sound effect simulation
+        let typingTimeout;
+        numberInput.addEventListener('input', function() {
+            this.style.borderColor = '#00d2ff';
+            this.style.boxShadow = '0 0 10px rgba(0, 210, 255, 0.3)';
+            
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                this.style.boxShadow = 'none';
+            }, 1000);
+        });
+
+        // Enhanced scroll reveal
+        window.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('#stars-container');
+            if (parallax) {
+                parallax.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+
+        // Add random glow effects to cards periodically
+        setInterval(() => {
+            const cards = document.querySelectorAll('.glass, .step-card');
+            const randomCard = cards[Math.floor(Math.random() * cards.length)];
+            if (randomCard) {
+                randomCard.style.boxShadow = '0 0 30px rgba(0, 210, 255, 0.3)';
+                setTimeout(() => {
+                    randomCard.style.boxShadow = '';
+                }, 2000);
+            }
+        }, 5000);
+
+        console.log('🚀 ASTRIX-MD Professional loaded successfully!');
+        console.log('💫 Made with ❤️ by ROMEK XD');
+    </script>
+</body>
+</html>
