@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "github:TAYYAB-Exploits/Tayyab_Ballieys",
+    "@whiskeysockets/baileys": "6.7.19",
     "@dark-yasiya/scrap": "1.0.1",
     "@xaviabot/fb-downloader": "1.0.14",
     "darksadas-yt-pornhub-scrape": "^1.0.0",
@@ -17,7 +17,7 @@
     "node-fetch": "^2.6.7",
     "dotenv": "^16.4.5",
     "pino": "^8.17.0",
-    "jimp": "^0.16.1",
+    "jimp": "latest",
     "@octokit/rest": "^20.0.2",
     "denethdev-ytmp3": "1.0.3",
     "axios": "^1.2.5",
