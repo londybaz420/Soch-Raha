@@ -1,0 +1,30 @@
+{
+  "name": "Mini App",
+  "description": "A minimalist web application built with Node.js and Express.",
+  "repository": "https://github.com/chamodxxc/Mini",
+  "logo": "https://example.com/logo.png",
+  "keywords": ["node", "express", "web app"],
+  "env": {
+    "PORT": {
+      "description": "The port the app will listen on.",
+      "value": "3000"
+    },
+    "NODE_ENV": {
+      "description": "The environment in which the app is running.",
+      "value": "production"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "standard-1x"
+    }
+  },
+  "addons": [
+    "heroku-postgresql:mini"
+  ],
+  "scripts": {
+    "postdeploy": "npm install"
+  },
+  "success_url": "/"
+}

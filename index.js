@@ -20,7 +20,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.listen(PORT, () => {
     console.log(`
-server File Is Ready to Use
+Don't Forget To Give Star ‼️
+
 
 Server running on http://localhost:` + PORT)
 });
