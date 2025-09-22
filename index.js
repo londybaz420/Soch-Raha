@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.listen(PORT, () => {
     console.log(`
-HELLO SIR
+server File Is Ready to Use
 
 Server running on http://localhost:` + PORT)
 });
