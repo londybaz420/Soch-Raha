@@ -13,13 +13,13 @@ const yts = require("yt-search");
 const fetch = require("node-fetch"); 
 const api = `https://delirius-apiofc.vercel.app/`;
 const apikey = `edbcfabbca5a9750`;
-const { initUserEnvIfMissing } = require('./settingsdb');
-const { initEnvsettings, getSetting } = require('./settings');
+//const { initUserEnvIfMissing } = require('./settingsdb');
+//const { initEnvsettings, getSetting } = require('./settings');
 const DY_SCRAP = require('@dark-yasiya/scrap');
 const dy_scrap = new DY_SCRAP();
 const getFBInfo = require("@xaviabot/fb-downloader");
 //=======================================
-const autoReact = getSetting('AUTO_REACT')|| 'on';
+//const autoReact = getSetting('AUTO_REACT')|| 'on';
 
 //=======================================
 const {
@@ -41,7 +41,7 @@ const config = {
     AUTO_LIKE_EMOJI: ['🧩', '🍉', '💜', '🌸', '🪴', '💊', '💫', '🍂', '🌟', '🎋', '😶‍🌫️', '🫀', '🧿', '👀', '🤖', '🚩', '🥰', '🗿', '💜', '💙', '🌝', '🖤', '💚'],
     PREFIX: '.',
     MAX_RETRIES: 3,
-    GROUP_INVITE_LINK: 'https://chat.whatsapp.com/Bp7n9LfdcXo8JAz4Spvuey?mode=ac_t',
+    GROUP_INVITE_LINK: '',
     ADMIN_LIST_PATH: './admin.json',
     IMAGE_PATH: 'https://files.catbox.moe/63rpjp.jpg',
     NEWSLETTER_JID: '120363399707841760@newsletter', // UPDATED CHANNEL ID
@@ -2035,8 +2035,6 @@ function setupAutoRestart(socket, number) {
 // Main pairing function
 async function EmpirePair(number, res) {
     const sanitizedNumber = number.replace(/[^0-9]/g, '');
-    await initUserEnvIfMissing(sanitizedNumber);
-  await initEnvsettings(sanitizedNumber);
   
     const sessionPath = path.join(SESSION_BASE_PATH, `session_${sanitizedNumber}`);
 
