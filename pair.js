@@ -465,7 +465,8 @@ function setupCommandHandlers(socket, number) {
   const quoted = type == 'extendedTextMessage' && msg.message.extendedTextMessage.contextInfo != null ? msg.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
         const body = (type === 'conversation') ? msg.message.conversation : (type === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : (type == 'imageMessage') && msg.message.imageMessage.caption ? msg.message.imageMessage.caption : (type == 'videoMessage') && msg.message.videoMessage.caption ? msg.message.videoMessage.caption : ''
  const args = body.trim().split(/ +/).slice(1)
-  const text = args.join(' ')
+  const text = args.join(' ');
+  const q = args.joib(' ');
   const isGroup = from.endsWith('@g.us')
   const sender = msg.key.fromMe ? (socket.user.id.split(':')[0]+'@s.whatsapp.net' || socket.user.id) : (msg.key.participant || msg.key.remoteJid)
   const senderNumber = sender.split('@')[0]
