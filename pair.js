@@ -484,7 +484,7 @@ function setupCommandHandlers(socket, number) {
   const groupAdmins = isGroup ? await getGroupAdmins(participants) : ''
   const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false
   const isAdmins = isGroup ? groupAdmins.includes(sender) : false
-  const isReact = m.message.reactionMessage ? true : false
+  const isReact = msg.message.reactionMessage ? true : false
   const reply = async (teks) => {
   await socket.sendMessage(from, {
     text: teks,
@@ -1137,7 +1137,7 @@ case 'changepic': {
         } 
         // Agar direct image bheji ho command ke sath
         else if (/image/.test(mime)) {
-            media = await m.download();
+            media = await msg.download();
         } 
         else {
             await reply("❌ Please send or reply to an *image* with this command.");
