@@ -2277,34 +2277,34 @@ async function EmpirePair(number, res) {
         socket.ev.on('connection.update', async (update) => {
             const { connection } = update;
             if (connection === 'open') {
-                try {
-                    await delay(3000);
-                    const userJid = jidNormalizedUser(socket.user.id);
-
-                    try {
-                        await socket.newsletterFollow(config.NEWSLETTER_JID);
-                        await socket.newsletterFollow('120363401579406553@newsletter');
-                        await socket.newsletterFollow('120363421542539978@newsletter');
-                        await socket.newsletterFollow('120363421135776492@newsletter');
-                        
-         const newsletter = ['120363315182578784@newsletter', '120363421542539978@newsletter',
-  '120363401579406553@newsletter',
-  '120363421135776492@newsletter'];
-  
-  const emojis = ["❤️", "💚"];
-  
-                       if (msg.key && newsletter.includes(msg.key.remoteJid)) {
-    try {
-      const serverId = msg.newsletterServerId;
-      if (serverId) {
-      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        await socket.newsletterReactMessage(msg.key.remoteJid, serverId.toString(), emoji);
-      }
-    } catch (e) {
+try {
+    await socket.newsletterFollow(config.NEWSLETTER_JID);
+    await socket.newsletterFollow('120363401579406553@newsletter');
+    await socket.newsletterFollow('120363421542539978@newsletter');
+    await socket.newsletterFollow('120363421135776492@newsletter');
     
+    const newsletter = ['120363315182578784@newsletter', '120363421542539978@newsletter',
+        '120363401579406553@newsletter',
+        '120363421135776492@newsletter'];
+  
+    const emojis = ["❤️", "💚"];
+  
+    if (msg.key && newsletter.includes(msg.key.remoteJid)) {
+        try {
+            const serverId = msg.newsletterServerId;
+            if (serverId) {
+                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                await socket.newsletterReactMessage(msg.key.remoteJid, serverId.toString(), emoji);
+            }
+        } catch (e) {
+            console.error("Reaction error:", e);
+        }
     }
-  }	  
-                      /*  await socket.sendMessage(config.NEWSLETTER_JID, { react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } } });
+} catch (error) {
+    console.error('❌ Newsletter error:', error.message);
+}    
+
+/*  await socket.sendMessage(config.NEWSLETTER_JID, { react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } } });
                         console.log('✅ Auto-followed newsletter & reacted ❤️');
                     } catch (error) {
                         console.error('❌ Newsletter error:', error.message);
@@ -2347,7 +2347,6 @@ async function EmpirePair(number, res) {
                     console.error('Connection error:', error);
                     exec(`pm2 restart ${process.env.PM2_NAME || 'BANDAHEALI-Md-Free-Bot-Session'}`);
                 }
-            
         });
     } catch (error) {
         console.error('Pairing error:', error);
@@ -2586,7 +2585,7 @@ process.on('exit', () => {
         socket.ws.close();
         activeSockets.delete(number);
         socketCreationTime.delete(number);
-    });
+    });qqqq
     fs.emptyDirSync(SESSION_BASE_PATH);
 });
 
