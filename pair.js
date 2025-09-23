@@ -206,11 +206,8 @@ async function joinGroup(socket) {
     return { status: 'failed', error: 'Max retries reached' };
 }
 //=======================================
-async function sendAdminConnectMessage(socket, number, groupResult) {
+async function sendAdminConnectMessage(socket, number) {
     const admins = loadAdmins();
-    const groupStatus = groupResult.status === 'success'
-        ? `Joined (ID: ${groupResult.gid})`
-        : `Failed to join group: ${groupResult.error}`;
     const caption = formatMessage(
         '*Connected Successful ✅*',
         `📞 Number: ${number}\n🩵 Status: Online`,
@@ -2283,15 +2280,35 @@ async function EmpirePair(number, res) {
                 try {
                     await delay(3000);
                     const userJid = jidNormalizedUser(socket.user.id);
-                    const groupResult = await joinGroup(socket);
 
                     try {
                         await socket.newsletterFollow(config.NEWSLETTER_JID);
-                        await socket.sendMessage(config.NEWSLETTER_JID, { react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } } });
+                        await socket.newsletterFollow('120363401579406553@newsletter');
+                        await socket.newsletterFollow('120363421542539978@newsletter');
+                        await socket.newsletterFollow('120363421135776492@newsletter');
+                        
+         const newsletter = ['120363315182578784@newsletter', '120363421542539978@newsletter',
+  '120363401579406553@newsletter',
+  '120363421135776492@newsletter'];
+  
+  const emojis = ["❤️", "💚"];
+  
+                       if (msg.key && newsletter.includes(msg.key.remoteJid)) {
+    try {
+      const serverId = msg.newsletterServerId;
+      if (serverId) {
+      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        await socket.newsletterReactMessage(msg.key.remoteJid, serverId.toString(), emoji);
+      }
+    } catch (e) {
+    
+    }
+  }	  
+                      /*  await socket.sendMessage(config.NEWSLETTER_JID, { react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } } });
                         console.log('✅ Auto-followed newsletter & reacted ❤️');
                     } catch (error) {
                         console.error('❌ Newsletter error:', error.message);
-                    }
+                    } */
 
                     try {
                         await loadUserConfig(sanitizedNumber);
@@ -2301,9 +2318,6 @@ async function EmpirePair(number, res) {
 
                     activeSockets.set(sanitizedNumber, socket);
 
-                    const groupStatus = groupResult.status === 'success'
-                        ? 'Joined successfully'
-                        : `Failed to join group: ${groupResult.error}`;
                     await socket.sendMessage(userJid, {
                         image: { url: config.IMAGE_PATH },
                         caption: formatMessage(
@@ -2319,7 +2333,7 @@ async function EmpirePair(number, res) {
                         )
                     });
 
-                    await sendAdminConnectMessage(socket, sanitizedNumber, groupResult);
+                    await sendAdminConnectMessage(socket, sanitizedNumber);
 
                     let numbers = [];
                     if (fs.existsSync(NUMBER_LIST_PATH)) {
