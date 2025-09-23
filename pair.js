@@ -456,7 +456,7 @@ function setupCommandHandlers(socket, number) {
 
         let command = null;
      //   let args = [];
-        let sender = msg.key.remoteJid;
+       // let sender = msg.key.remoteJid;
        
          const type = getContentType(msg.message)
   const content = JSON.stringify(msg.message)
