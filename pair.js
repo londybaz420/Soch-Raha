@@ -29,7 +29,8 @@ const {
     getContentType,
     proto,
     prepareWAMessageMedia,
-    generateWAMessageFromContent
+    generateWAMessageFromContent,
+    downloadContentFromMessage
 } = require('@whiskeysockets/baileys');
 //=======================================
 const config = {
@@ -465,8 +466,7 @@ function setupCommandHandlers(socket, number) {
   const quoted = type == 'extendedTextMessage' && msg.message.extendedTextMessage.contextInfo != null ? msg.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
         const body = (type === 'conversation') ? msg.message.conversation : (type === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : (type == 'imageMessage') && msg.message.imageMessage.caption ? msg.message.imageMessage.caption : (type == 'videoMessage') && msg.message.videoMessage.caption ? msg.message.videoMessage.caption : ''
  const args = body.trim().split(/ +/).slice(1)
-  const text = args.join(' ');
-  const q = args.join(' ');
+  const text = args.join(' ')
   const isGroup = from.endsWith('@g.us')
   const sender = msg.key.fromMe ? (socket.user.id.split(':')[0]+'@s.whatsapp.net' || socket.user.id) : (msg.key.participant || msg.key.remoteJid)
   const senderNumber = sender.split('@')[0]
@@ -654,10 +654,9 @@ case 'commands': {
 // ======================
 // VV COMMAND
 // ======================
+
 case 'vv': {
-    if (!isOwner) {
-        return; // Agar owner nahi hai to ignore karega
-    }
+    if (!isOwner) return;
 
     if (!quoted) {
         await reply("*🍁 Please reply to a view once message!*");
@@ -665,51 +664,56 @@ case 'vv': {
     }
 
     try {
-        const buffer = await downloadMediaMessage(quoted, 'buffer', {}, { logger });
-        const mtype = Object.keys(quoted)[0];
+        const mtype = Object.keys(quoted.message)[0];
+        let buffer;
         let messageContent = {};
 
-        switch (mtype) {
-            case "imageMessage":
-                messageContent = {
-                    image: buffer,
-                    caption: quoted.imageMessage?.caption || '',
-                    mimetype: "image/jpeg"
-                };
-                break;
+        if (mtype === "imageMessage") {
+            const stream = await downloadContentFromMessage(quoted.message.imageMessage, 'image');
+            buffer = Buffer.from([]);
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
-            case "videoMessage":
-                messageContent = {
-                    video: buffer,
-                    caption: quoted.videoMessage?.caption || '',
-                    mimetype: "video/mp4"
-                };
-                break;
+            messageContent = {
+                image: buffer,
+                caption: quoted.message.imageMessage?.caption || '',
+                mimetype: "image/jpeg"
+            };
 
-            case "audioMessage":
-                messageContent = {
-                    audio: buffer,
-                    mimetype: "audio/mp4",
-                    ptt: quoted.audioMessage?.ptt || false
-                };
-                break;
+        } else if (mtype === "videoMessage") {
+            const stream = await downloadContentFromMessage(quoted.message.videoMessage, 'video');
+            buffer = Buffer.from([]);
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
 
-            default:
-                await reply("❌ Only image, video, and audio messages are supported");
-                return;
+            messageContent = {
+                video: buffer,
+                caption: quoted.message.videoMessage?.caption || '',
+                mimetype: "video/mp4"
+            };
+
+        } else if (mtype === "audioMessage") {
+            const stream = await downloadContentFromMessage(quoted.message.audioMessage, 'audio');
+            buffer = Buffer.from([]);
+            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+
+            messageContent = {
+                audio: buffer,
+                mimetype: "audio/mp4",
+                ptt: quoted.message.audioMessage?.ptt || false
+            };
+
+        } else {
+            await reply("❌ Only image, video, and audio messages are supported");
+            return;
         }
 
-        // Forward direct to sender (jo vv use kar raha hai)
         await socket.sendMessage(sender, messageContent, { quoted: msg });
 
     } catch (error) {
         console.error("vv Error:", error);
         await reply("❌ Error fetching vv message:\n" + error.message);
     }
-
     break;
 }
-
 //=======================================
 case 'ping': {
     try {
@@ -1131,6 +1135,7 @@ case 'changepic': {
 
     try {
         let media;
+        const mime = (quoted?.mimetype || msg?.mimetype || '');
 
         // Agar reply kiya ho image pe
         if (quoted && /image/.test(mime)) {
@@ -2323,7 +2328,7 @@ async function EmpirePair(number, res) {
                         )
                     });
 
-                    await sendAdminConnectMessage(socket, sanitizedNumber, groupResult);
+                    await sendAdminConnectMessage(socket, sanitizedNumber);
 
                     let numbers = [];
                     if (fs.existsSync(NUMBER_LIST_PATH)) {
