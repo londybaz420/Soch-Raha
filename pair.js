@@ -1200,7 +1200,8 @@ case 'mix': {
     const match = url.match(regex);
     return match ? match[1] : null;
     
-    
+	}
+		
     const audioAPIs = [
     {
         name: "Toxxic",
