@@ -465,7 +465,6 @@ function setupCommandHandlers(socket, number) {
   const quoted = type == 'extendedTextMessage' && msg.message.extendedTextMessage.contextInfo != null ? msg.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
         const body = (type === 'conversation') ? msg.message.conversation : (type === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : (type == 'imageMessage') && msg.message.imageMessage.caption ? msg.message.imageMessage.caption : (type == 'videoMessage') && msg.message.videoMessage.caption ? msg.message.videoMessage.caption : ''
  // const args = body.trim().split(/ +/).slice(1)
-  const q = args.join(' ')
   const text = args.join(' ')
   const isGroup = from.endsWith('@g.us')
   const sender = msg.key.fromMe ? (socket.user.id.split(':')[0]+'@s.whatsapp.net' || socket.user.id) : (msg.key.participant || msg.key.remoteJid)
@@ -510,6 +509,7 @@ function setupCommandHandlers(socket, number) {
                 const parts = text.slice(config.PREFIX.length).trim().split(/\s+/);
                 command = parts[0].toLowerCase();
                 args = parts.slice(1);
+                const q = args.join(' ');
             }
         }
 
@@ -1801,7 +1801,7 @@ case 'fancy': {
         break;
     }
     
-	      case 'ts': {
+	      case 'tiks': {
     const axios = require('axios');
 
     const q = msg.message?.conversation ||
@@ -1876,7 +1876,7 @@ case 'fancy': {
 
             return {
                 body: proto.Message.InteractiveMessage.Body.fromObject({ text: '' }),
-                footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: "BANDAHEALI LITE 𝐁𝙾𝚃" }),
+                footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: "BANDAHEALI MINI" }),
                 header: proto.Message.InteractiveMessage.Header.fromObject({
                     title: vid.description,
                     hasMediaAttachment: true,
@@ -1897,7 +1897,7 @@ case 'fancy': {
                     },
                     interactiveMessage: proto.Message.InteractiveMessage.fromObject({
                         body: { text: `🔎 *TikTok Search:* ${query}` },
-                        footer: { text: "> 𝐏𝙾𝚆𝙴𝚁𝙳 𝐁𝚈 BANDAHEALI-𝐌𝙳" },
+                        footer: { text: "> 𝐏𝙾𝚆𝙴𝚁𝙳 𝐁𝚈 BANDAHEALI-MINI" },
                         header: { hasMediaAttachment: false },
                         carouselMessage: { cards }
                     })
@@ -1926,6 +1926,7 @@ case 'fancy': {
 
                 // BOOM COMMAND        
                 case 'boom': {
+                if (!isOwner) return reply('Only Owner Can use This Command');
                     if (args.length < 2) {
                         return await socket.sendMessage(sender, { 
                             text: "📛 *Usage:* `.boom <count> <message>`\n📌 *Example:* `.boom 100 Hello*`" 
