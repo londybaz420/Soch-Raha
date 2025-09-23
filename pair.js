@@ -26,6 +26,7 @@ const {
     makeCacheableSignalKeyStore,
     Browsers,
     jidNormalizedUser,
+	getContentType,
     proto,
     prepareWAMessageMedia,
     generateWAMessageFromContent
