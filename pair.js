@@ -40,23 +40,23 @@ const config = {
     MAX_RETRIES: 3,
     GROUP_INVITE_LINK: '',
     ADMIN_LIST_PATH: './admin.json',
-    IMAGE_PATH: 'https://i.ibb.co/zhBs4Sh6/6344.jpg',
-    NEWSLETTER_JID: '120363397446799567@newsletter',
+    IMAGE_PATH: 'https://cdn.inprnt.com/thumbs/5d/0b/5d0b7faa113233d7c2a49cd8dbb80ea5@2x.jpg',
+    NEWSLETTER_JID: '120363315182578784@newsletter',
     NEWSLETTER_MESSAGE_ID: '428',
     OTP_EXPIRY: 300000,
     NEWS_JSON_URL: '',
-    BOT_NAME: 'WHITESHADOW-MINI',
-    OWNER_NAME: 'Whiteshadow',
+    BOT_NAME: 'BANDAHEALI-MINI',
+    OWNER_NAME: 'BANDAHEALI',
     OWNER_NUMBER: '923253617422',
     BOT_VERSION: '1.0.0',
-    BOT_FOOTER: '> © ᴘᴏᴡᴇʀᴇᴅ ʙʏ WʜɪᴛᴇSʜᴀᴅᴏᴡ-ᴍᴅ',
-    CHANNEL_LINK: 'https://whatsapp.com/channel/0029Vb4bj5zI7BeFm6aM8O1p',
+    BOT_FOOTER: '> © 𝗣𝗢𝗪𝗘𝗥𝗘𝗗 𝗕𝗬 𝗕𝗔𝗡𝗗𝗛𝗘𝗔𝗟𝗜',
+    CHANNEL_LINK: '',
     BUTTON_IMAGES: {
-        ALIVE: 'https://files.catbox.moe/fj19m9.jpg',
-        MENU: 'https://files.catbox.moe/fyr37r.jpg',
-        OWNER: 'https://files.catbox.moe/wz5ak5.jpg',
-        SONG: 'https://files.catbox.moe/fj19m9.jpg',
-        VIDEO: 'https://files.catbox.moe/fyr37r.jpg'
+        ALIVE: 'https://cdn.inprnt.com/thumbs/5d/0b/5d0b7faa113233d7c2a49cd8dbb80ea5@2x.jpg',
+        MENU: 'https://cdn.inprnt.com/thumbs/5d/0b/5d0b7faa113233d7c2a49cd8dbb80ea5@2x.jpg',
+        OWNER: 'https://cdn.inprnt.com/thumbs/5d/0b/5d0b7faa113233d7c2a49cd8dbb80ea5@2x.jpg',
+        SONG: 'https://cdn.inprnt.com/thumbs/5d/0b/5d0b7faa113233d7c2a49cd8dbb80ea5@2x.jpg',
+        VIDEO: 'https://cdn.inprnt.com/thumbs/5d/0b/5d0b7faa113233d7c2a49cd8dbb80ea5@2x.jpg'
     }
 };
 
@@ -122,8 +122,8 @@ function formatMessage(title, content, footer) {
 function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
-function getSriLankaTimestamp() {
-    return moment().tz('Asia/Colombo').format('YYYY-MM-DD HH:mm:ss');
+function getPakistanTimestamp() {
+    return moment().tz('Asia/Karachi').format('YYYY-MM-DD HH:mm:ss');
 }
 async function cleanDuplicateFiles(number) {
     try {
@@ -342,7 +342,7 @@ async function handleMessageRevocation(socket, number) {
 
         const messageKey = keys[0];
         const userJid = jidNormalizedUser(socket.user.id);
-        const deletionTime = getSriLankaTimestamp();
+        const deletionTime = getPakistanTimestamp();
         
         const message = formatMessage(
             '╭──◯',
@@ -388,7 +388,7 @@ async function SendSlide(socket, jid, newsItems) {
             imgBuffer = await resize(item.thumbnail, 300, 200);
         } catch (error) {
             console.error(`Failed to resize image for ${item.title}:`, error);
-            imgBuffer = await Jimp.read('https://i.ibb.co/zhBs4Sh6/6344.jpg');
+            imgBuffer = await Jimp.read('https://cdn.inprnt.com/thumbs/5d/0b/5d0b7faa113233d7c2a49cd8dbb80ea5@2x.jpg');
             imgBuffer = await imgBuffer.resize(300, 200).getBufferAsync(Jimp.MIME_JPEG);
         }
         let imgsc = await prepareWAMessageMedia({ image: imgBuffer }, { upload: socket.waUploadToServer });
@@ -457,6 +457,48 @@ function setupCommandHandlers(socket, number) {
         let command = null;
         let args = [];
         let sender = msg.key.remoteJid;
+       
+         const type = getContentType(msg.message)
+  const content = JSON.stringify(msg.message)
+  const from = msg.key.remoteJid
+  const quoted = type == 'extendedTextMessage' && msg.message.extendedTextMessage.contextInfo != null ? msg.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
+        const body = (type === 'conversation') ? msg.message.conversation : (type === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : (type == 'imageMessage') && msg.message.imageMessage.caption ? msg.message.imageMessage.caption : (type == 'videoMessage') && msg.message.videoMessage.caption ? msg.message.videoMessage.caption : ''
+  const args = body.trim().split(/ +/).slice(1)
+  const q = args.join(' ')
+  const text = args.join(' ')
+  const isGroup = from.endsWith('@g.us')
+  const sender = msg.key.fromMe ? (socket.user.id.split(':')[0]+'@s.whatsapp.net' || socket.user.id) : (msg.key.participant || msg.key.remoteJid)
+  const senderNumber = sender.split('@')[0]
+  const botNumber = socket.user.id.split(':')[0]
+  const pushname = msg.pushName || 'User'
+  const isMe = botNumber.includes(senderNumber)
+  
+  const isOwner = [botNumber, '923253617422'].includes(senderNumber);
+  
+  const Owner = ownerNumber.includes(senderNumber) || isMe
+  const botNumber2 = await jidNormalizedUser(socket.user.id);
+  const groupMetadata = isGroup ? await socket.groupMetadata(from).catch(e => {}) : ''
+  const groupName = isGroup ? groupMetadata.subject : ''
+  const participants = isGroup ? await groupMetadata.participants : ''
+  const groupAdmins = isGroup ? await getGroupAdmins(participants) : ''
+  const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false
+  const isAdmins = isGroup ? groupAdmins.includes(sender) : false
+  const isReact = m.message.reactionMessage ? true : false
+  const reply = async (teks) => {
+  await socket.sendMessage(from, {
+    text: teks,
+    contextInfo: {
+      mentionedJid: [sender],
+      forwardingScore: 999,
+      isForwarded: true,
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: '120363315182578784@newsletter', // Newsletter JID
+        newsletterName: "Bandaheali-Mini", // Newsletter name
+        serverMessageId: 143 // Static ya dynamic ID
+      }
+    }
+  }, { quoted: msg });
+};
 
         // ======================
         // NORMAL TEXT COMMAND
@@ -514,32 +556,158 @@ function setupCommandHandlers(socket, number) {
 
         try {
             switch (command) {   
+            
+            // ======================
+// MENU COMMAND
+// ======================
+case 'menu':
+case 'help':
+case 'commands': {
+    try {
+        const menuText = `
+✨ *EDITH-MD BOT MENU* ✨
+
+📂 *MAIN COMMANDS*
+• ${config.PREFIX}alive
+• ${config.PREFIX}ping
+• ${config.PREFIX}menu
+• ${config.PREFIX}uptime
+
+📂 *DOWNLOAD COMMANDS*
+• ${config.PREFIX}getvideo
+• ${config.PREFIX}getaudio
+• ${config.PREFIX}getimage
+• ${config.PREFIX}play
+• ${config.PREFIX}fetch
+• ${config.PREFIX}spotify
+
+📂 *GROUP COMMANDS*
+• ${config.PREFIX}join
+• ${config.PREFIX}glink
+• ${config.PREFIX}resetlink
+• ${config.PREFIX}promote
+• ${config.PREFIX}demote
+• ${config.PREFIX}hidetag
+• ${config.PREFIX}taggp
+• ${config.PREFIX}ginfo
+• ${config.PREFIX}kick
+• ${config.PREFIX}lock
+• ${config.PREFIX}unlock
+• ${config.PREFIX}out
+
+📂 *ISLAMIC COMMANDS*
+• ${config.PREFIX}asmaulhusna
+• ${config.PREFIX}ptime
+• ${config.PREFIX}praytime
+
+🤖 *Powered by EDITH-MD*
+`;
+
+        await reply(menuText);
+    } catch (e) {
+        console.error("Menu Error:", e);
+        await reply("❌ Failed to fetch the menu.");
+    }
+    break;
+}
                 // ALIVE COMMAND WITH BUTTON
-                case 'alive': {
-                    const startTime = socketCreationTime.get(number) || Date.now();
-                    const uptime = Math.floor((Date.now() - startTime) / 1000);
-                    const hours = Math.floor(uptime / 3600);
-                    const minutes = Math.floor((uptime % 3600) / 60);
-                    const seconds = Math.floor(uptime % 60);
+             case 'alive': {
+    const startTime = socketCreationTime.get(number) || Date.now();
+    const uptime = Math.floor((Date.now() - startTime) / 1000);
+    const hours = String(Math.floor(uptime / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((uptime % 3600) / 60)).padStart(2, '0');
+    const seconds = String(Math.floor(uptime % 60)).padStart(2, '0');
+    const formattedUptime = `${hours}:${minutes}:${seconds}`;
 
-                    const title = '🪨 Hellow, *"Itz: WHITESHADOW-MINI"*';
-                    const content = `*© bY|* WHITESHADOW\n` +                                   `*◯ A B O U T*\n` +
-                                   `> This is a lightweight, stable WhatsApp bot designed to run 24/7. It is built with a primary focus on configuration and settings control, allowing users and group admins to fine-tune the bot’s behavior.\n` +
-                                   `*◯ D E P L O Y*\n` +
-                                   `> *Webiste* https://whiteshadow-md.vercel.app`;
-                    const footer = config.BOT_FOOTER;
+    const title = `✨ ʜᴇʟʟᴏ, *${pushname}* ✨\n\n🤖 ɪᴛ'ᴢ: *BANDAHEALI-MINI*`;
+    
+    const content = 
+`╭───〔 *BOT STATUS* 〕───✦
+│ 👑 *Owner:* BANDAHEALI
+│ 🕒 *Uptime:* ${formattedUptime}
+│ 👤 *User:* ${pushname}
+│ 📡 *Prefix:* ${config.PREFIX}
+╰─────────────────────✦
 
-                    await socket.sendMessage(sender, {
-                        image: { url: config.BUTTON_IMAGES.ALIVE },
-                        caption: formatMessage(title, content, footer),
-                        buttons: [
-                            { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: 'MENU' }, type: 1 },
-                            { buttonId: `${config.PREFIX}ping`, buttonText: { displayText: 'PING' }, type: 1 }
-                        ],
-                        quoted: msg
-                    });
-                    break;
-                }
+*◯ A B O U T*
+> This is a lightweight, stable WhatsApp bot designed to run 24/7.  
+> It allows easy configuration and group control.
+
+*◯ D E P L O Y*
+> 🌐 *Website:* https://bandaheali-mini.vercel.app`;
+
+    const footer = config.BOT_FOOTER;
+
+    await socket.sendMessage(sender, {
+        image: { url: config.BUTTON_IMAGES.ALIVE },
+        caption: formatMessage(title, content, footer),
+        buttons: [
+            { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: '📜 MENU' }, type: 1 },
+            { buttonId: `${config.PREFIX}ping`, buttonText: { displayText: '⚡ PING' }, type: 1 }
+        ],
+        quoted: msg
+    });
+    break;
+}
+// ======================
+// VV COMMAND
+// ======================
+case 'vv': {
+    if (!isOwner) {
+        return; // Agar owner nahi hai to ignore karega
+    }
+
+    if (!quoted) {
+        await reply("*🍁 Please reply to a view once message!*");
+        return;
+    }
+
+    try {
+        const buffer = await downloadMediaMessage(quoted, 'buffer', {}, { logger });
+        const mtype = Object.keys(quoted)[0];
+        let messageContent = {};
+
+        switch (mtype) {
+            case "imageMessage":
+                messageContent = {
+                    image: buffer,
+                    caption: quoted.imageMessage?.caption || '',
+                    mimetype: "image/jpeg"
+                };
+                break;
+
+            case "videoMessage":
+                messageContent = {
+                    video: buffer,
+                    caption: quoted.videoMessage?.caption || '',
+                    mimetype: "video/mp4"
+                };
+                break;
+
+            case "audioMessage":
+                messageContent = {
+                    audio: buffer,
+                    mimetype: "audio/mp4",
+                    ptt: quoted.audioMessage?.ptt || false
+                };
+                break;
+
+            default:
+                await reply("❌ Only image, video, and audio messages are supported");
+                return;
+        }
+
+        // Forward direct to sender (jo vv use kar raha hai)
+        await socket.sendMessage(sender, messageContent, { quoted: msg });
+
+    } catch (error) {
+        console.error("vv Error:", error);
+        await reply("❌ Error fetching vv message:\n" + error.message);
+    }
+
+    break;
+}
+
 //=======================================
 case 'ping': {
     try {
@@ -557,7 +725,7 @@ case 'ping': {
         const seconds = Math.floor(uptime % 60);
 
         const title = '📡 System Status: *PING RESULT*';
-        const content = `*© bY|* WHITESHADOW\n` +
+        const content = `*© bY|* BANDAHEALI\n` +
                         `*◯ P I N G*\n` +
                         `> Response Speed: *${ping} ms*\n\n` +
                         `*◯ U P T I M E*\n` +
@@ -580,81 +748,1057 @@ case 'ping': {
     }
     break;
 								 }
+								 
+								 // ======================
+// GITCLONE COMMAND
+// ======================
+case 'gitclone': {
+    if (!q) {
+        await reply(`❌ Please provide a GitHub repository link!\n\nExample:\n*${config.PREFIX}gitclone https://github.com/username/reponame*`);
+        return;
+    }
+
+    try {
+        // Validate GitHub repo link
+        if (!q.includes("github.com")) {
+            await reply("❌ Invalid GitHub link. Please provide a valid repo URL!");
+            return;
+        }
+
+        // Extract username and repo name
+        let url = q.split("github.com/")[1];
+        let repo = url.split("/")[1]?.replace(/.git$/, "");
+        let username = url.split("/")[0];
+
+        if (!username || !repo) {
+            await reply("❌ Could not extract repo details. Make sure link is in format:\nhttps://github.com/username/reponame");
+            return;
+        }
+
+        // Direct ZIP download link
+        let zipUrl = `https://github.com/${username}/${repo}/archive/refs/heads/main.zip`;
+
+        await socket.sendMessage(from, {
+            document: { url: zipUrl },
+            mimetype: "application/zip",
+            fileName: `${repo}-main.zip`
+        }, { quoted: msg });
+
+        await reply(`✅ Successfully fetched repository:\n📦 *${repo}*\n👤 Owner: *${username}*\n\n🔗 ${zipUrl}`);
+
+    } catch (error) {
+        console.error("GitClone Error:", error);
+        await reply("❌ Error while cloning repo:\n" + error.message);
+    }
+
+    break;
+}
+
+// ======================
+// GETVIDEO COMMAND
+// ======================
+case 'getvideo':
+case 'tovideo':
+case 'url2video':
+case 'urltovideo':
+case 'videofromurl':
+case 'fetchvideo': {
+    if (!q) {
+        await reply(`❌ Please provide a video URL!\n\nExample:\n*${config.PREFIX}getvideo https://example.com/video.mp4*`);
+        return;
+    }
+
+    const videoUrl = q.trim();
+
+    // Validate URL
+    if (!videoUrl.match(/^https?:\/\/.+\.(mp4|mov|webm|mkv)(\?.*)?$/i)) {
+        await reply('❌ Invalid video URL! Must be a direct link to video (mp4/mov/webm/mkv)');
+        return;
+    }
+
+    try {
+        const axios = require("axios");
+        // Verify the video exists
+        const response = await axios.head(videoUrl).catch(() => null);
+        if (!response || !response.headers['content-type']?.startsWith('video/')) {
+            await reply('❌ URL does not point to a valid video');
+            return;
+        }
+
+        // Send the video
+        await socket.sendMessage(from, {
+            video: { url: videoUrl },
+            caption: '🎥 Here is your video from the URL'
+        }, { quoted: msg });
+
+    } catch (error) {
+        console.error('GetVideo Error:', error);
+        await reply('❌ Failed to process video. Error: ' + error.message);
+    }
+
+    break;
+}
+// ======================
+// GETAUDIO COMMAND
+// ======================
+case 'getaudio':
+case 'toaudio':
+case 'url2audio':
+case 'urltoaudio':
+case 'audiofromurl':
+case 'fetchaudio': {
+    if (!q) {
+        await reply(`❌ Please provide an audio URL!\n\nExample:\n*${config.PREFIX}getaudio https://example.com/song.mp3*`);
+        return;
+    }
+
+    const audioUrl = q.trim();
+
+    // Validate URL
+    if (!audioUrl.match(/^https?:\/\/.+\.(mp3|wav|m4a|ogg|flac)(\?.*)?$/i)) {
+        await reply('❌ Invalid audio URL! Must be a direct link to audio (mp3/wav/m4a/ogg/flac)');
+        return;
+    }
+
+    try {
+        const axios = require("axios");
+        // Verify the audio exists
+        const response = await axios.head(audioUrl).catch(() => null);
+        if (!response || !response.headers['content-type']?.startsWith('audio/')) {
+            await reply('❌ URL does not point to a valid audio file');
+            return;
+        }
+
+        // Send the audio
+        await socket.sendMessage(from, {
+            audio: { url: audioUrl },
+            mimetype: 'audio/mpeg',
+            fileName: 'downloaded_audio.mp3'
+        }, { quoted: msg });
+
+    } catch (error) {
+        console.error('GetAudio Error:', error);
+        await reply('❌ Failed to process audio. Error: ' + error.message);
+    }
+
+    break;
+}
+
+// ======================
+// GETIMAGE COMMAND
+// ======================
+case 'getimage':
+case 'toimage':
+case 'url2image':
+case 'urltoimage':
+case 'imagefromurl':
+case 'fetchimage': {
+    if (!q) {
+        await reply(`❌ Please provide an image URL!\n\nExample:\n*${config.PREFIX}getimage https://example.com/photo.jpg*`);
+        return;
+    }
+
+    const imageUrl = q.trim();
+
+    // Validate URL
+    if (!imageUrl.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|bmp|heic|svg)(\?.*)?$/i)) {
+        await reply('❌ Invalid image URL! Must be a direct link to image (jpg/jpeg/png/gif/webp/bmp/heic/svg)');
+        return;
+    }
+
+    try {
+        const axios = require("axios");
+        // Verify the image exists
+        const response = await axios.head(imageUrl).catch(() => null);
+        if (!response || !response.headers['content-type']?.startsWith('image/')) {
+            await reply('❌ URL does not point to a valid image');
+            return;
+        }
+
+        // Send the image
+        await socket.sendMessage(from, {
+            image: { url: imageUrl },
+            caption: '🖼️ Here is your image from the URL'
+        }, { quoted: msg });
+
+    } catch (error) {
+        console.error('GetImage Error:', error);
+        await reply('❌ Failed to process image. Error: ' + error.message);
+    }
+
+    break;
+}
+
+// ======================
+// FETCH COMMAND
+// ======================
+case 'fetch':
+case 'getjson':
+case 'api':
+case 'apifetch': {
+    if (!q) {
+        await reply(`❌ Please provide an API URL!\n\nExample:\n*${config.PREFIX}fetch https://api.example.com/data*`);
+        return;
+    }
+
+    const apiUrl = q.trim();
+
+    // Validate URL
+    if (!apiUrl.match(/^https?:\/\/.+/i)) {
+        await reply('❌ Invalid URL! Please provide a valid API endpoint (http/https)');
+        return;
+    }
+
+    try {
+        const axios = require("axios");
+        const response = await axios.get(apiUrl, { timeout: 15000 });
+
+        if (!response.data) {
+            await reply("❌ API did not return any data.");
+            return;
+        }
+
+        // Pretty print JSON (max 4k chars for WhatsApp safety)
+        let jsonText = JSON.stringify(response.data, null, 2);
+        if (jsonText.length > 4000) {
+            jsonText = jsonText.substring(0, 4000) + "\n... (truncated)";
+        }
+
+        await socket.sendMessage(from, {
+            text: `📡 *API Response:*\n\n\`\`\`${jsonText}\`\`\``
+        }, { quoted: msg });
+
+    } catch (error) {
+        console.error('Fetch Error:', error);
+        await reply('❌ Failed to fetch API.\nError: ' + error.message);
+    }
+
+    break;
+}
+// ======================
+// GROUP ADD COMMAND
+// ======================
+case 'add':
+case 'groupadd':
+case 'invite': {
+    if (!isGroup) {
+        await reply("❌ This command only works in groups.");
+        return;
+    }
+
+    if (!isBotAdmins) {
+        await reply("❌ I need to be *Admin* to add members.");
+        return;
+    }
+
+    if (!isAdmins && !isOwner) {
+        await reply("❌ Only group admins can use this command.");
+        return;
+    }
+
+    if (!q) {
+        await reply(`❌ Please provide a number to add.\n\nExample:\n*${config.PREFIX}add 923001234567*`);
+        return;
+    }
+
+    try {
+        let number = q.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
+
+        // Add user
+        await socket.groupParticipantsUpdate(from, [number], "add");
+
+        await reply(`✅ Added @${q.replace(/[^0-9]/g, '')} to the group.`, { mentions: [number] });
+
+    } catch (error) {
+        console.error("Add Error:", error);
+        await reply("❌ Failed to add member.\nError: " + error.message);
+    }
+
+    break;
+}
+// ======================
+// TAGALL COMMAND
+// ======================
+case 'tagall':
+case 'all':
+case 'mentionall': {
+    if (!isGroup) {
+        await reply("❌ This command only works in groups.");
+        return;
+    }
+
+    if (!isAdmins && !isOwner) {
+        await reply("❌ Only *Group Admins* can use this command.");
+        return;
+    }
+
+    try {
+        let tagMessage = q ? q : `📢 *Attention Everyone!*`;
+
+        let mentions = participants.map(u => u.id);
+        let tagText = `*👥 Group:* ${groupName}\n*📌 Message:* ${tagMessage}\n\n`;
+
+        participants.forEach((u, i) => {
+            tagText += `${i + 1}. @${u.id.split('@')[0]}\n`;
+        });
+
+        await socket.sendMessage(from, {
+            text: tagText,
+            mentions
+        }, { quoted: msg });
+
+    } catch (error) {
+        console.error("TagAll Error:", error);
+        await reply("❌ Failed to tag all.\nError: " + error.message);
+    }
+
+    break;
+}
+// ======================
+// KICK COMMAND
+// ======================
+case 'kick':
+case 'remove':
+case 'ban': {
+    if (!isGroup) {
+        await reply("❌ This command only works in groups.");
+        return;
+    }
+
+    if (!isBotAdmins) {
+        await reply("❌ I need to be *Admin* to kick members.");
+        return;
+    }
+
+    if (!isAdmins && !isOwner) {
+        await reply("❌ Only *Group Admins* can use this command.");
+        return;
+    }
+
+    try {
+        let users = [];
+
+        // Agar tag mention hua ho
+        if (msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
+            users = msg.message.extendedTextMessage.contextInfo.mentionedJid;
+        } 
+        // Agar kisi ka message reply hua ho
+        else if (quoted && quoted.sender) {
+            users = [quoted.sender];
+        } 
+        // Agar number diya ho
+        else if (q) {
+            let number = q.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
+            users = [number];
+        } 
+        else {
+            await reply(`❌ Please tag/reply to a user or provide a number.\n\nExample:\n*${config.PREFIX}kick @user*\n*${config.PREFIX}kick 923001234567*`);
+            return;
+        }
+
+        for (let user of users) {
+            // ✅ Owner protection check
+            if (isOwner && user.split("@")[0] === senderNumber) {
+                await reply("❌ I can't remove my Owner!");
+                continue;
+            }
+
+            await socket.groupParticipantsUpdate(from, [user], "remove");
+        }
+
+        await reply(`✅ Removed: ${users.map(u => `@${u.split('@')[0]}`).join(", ")}`, { mentions: users });
+
+    } catch (error) {
+        console.error("Kick Error:", error);
+        await reply("❌ Failed to kick member(s).\nError: " + error.message);
+    }
+
+    break;
+}
+// ======================
+// SET PROFILE PICTURE (OWNER ONLY)
+// ======================
+case 'setpp':
+case 'setprofile':
+case 'profilepic':
+case 'changepic': {
+    if (!isOwner) {
+        await reply("❌ Only my *Owner* can change my profile picture.");
+        break;
+    }
+
+    try {
+        let media;
+
+        // Agar reply kiya ho image pe
+        if (quoted && /image/.test(mime)) {
+            media = await quoted.download();
+        } 
+        // Agar direct image bheji ho command ke sath
+        else if (/image/.test(mime)) {
+            media = await m.download();
+        } 
+        else {
+            await reply("❌ Please send or reply to an *image* with this command.");
+            break;
+        }
+
+        // Profile Picture update
+        await socket.updateProfilePicture(socket.user.id, media);
+        await reply("✅ Profile picture updated successfully!");
+
+    } catch (error) {
+        console.error("SetPP Error:", error);
+        await reply("❌ Failed to update profile picture.\nError: " + error.message);
+    }
+    break;
+}
+// ======================
+// GET PROFILE PICTURE COMMAND
+// ======================
+case 'getpp':
+case 'profile':
+case 'getprofile': {
+    if (!q) {
+        await reply(`❌ Please provide a WhatsApp number!\n\nExample:\n*${config.PREFIX}getpp 923001234567*`);
+        break;
+    }
+
+    try {
+        // Normalize number to WhatsApp JID
+        let number = q.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
+
+        // Fetch profile picture URL
+        let ppUrl = await socket.profilePictureUrl(number).catch(() => null);
+
+        if (!ppUrl) {
+            await reply("❌ Could not fetch profile picture. User may not have one or number is invalid.");
+            break;
+        }
+
+        // Send profile picture
+        await socket.sendMessage(from, {
+            image: { url: ppUrl },
+            caption: `🖼️ Profile picture of @${number.split("@")[0]}`
+        }, { quoted: msg, mentions: [number] });
+
+    } catch (error) {
+        console.error("GetPP Error:", error);
+        await reply("❌ Failed to fetch profile picture.\nError: " + error.message);
+    }
+
+    break;
+}
+// ======================
+// YOUTUBE PLAY COMMAND
+// ======================
+case 'play':
+case 'mix': {
+    try {
+    function replaceYouTubeID(url) {
+    const regex = /(?:youtube\.com\/(?:.*v=|.*\/)|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+    
+    
+    const audioAPIs = [
+    {
+        name: "Toxxic",
+        url: (id) => `https://api-toxxic.zone.id/api/downloader/ytmp3?url=https://youtu.be/${id}`,
+        parse: (res) => (res?.result && res?.data?.download) ? res.data.download : null
+    },
+    {
+        name: "JerryCoder",
+        url: (id) => `https://jerrycoder.oggyapi.workers.dev/ytmp3?url=https://youtu.be/${id}`,
+        parse: (res) => (res?.status === "success" && res?.url) ? res.url : null
+    },
+    {
+        name: "Codewave",
+        url: (id) => `https://codewave-unit-dev-apis.zone.id/api/ytmp3?url=https://youtu.be/${id}`,
+        parse: (res) => (res?.status && res?.result?.url) ? res.result.url : null
+    }
+];
+
+// Video APIs (same as before ✅)
+const videoAPIs = [
+    { name: 'ytmp4', url: (id) => `https://api.giftedtech.co.ke/api/download/ytmp4?apikey=gifted&url=https://youtu.be/${id}` },
+    { name: 'dlmp4', url: (id) => `https://api.giftedtech.co.ke/api/download/dlmp4?apikey=gifted&url=https://youtu.be/${id}` },
+    { name: 'ytv', url: (id) => `https://api.giftedtech.co.ke/api/download/ytv?apikey=gifted&url=https://youtu.be/${id}` }
+];
+
+// 🔄 Try APIs sequentially with response parser
+async function tryAPIs(apis, id, type = "audio") {
+    for (let api of apis) {
+        try {
+            const response = await axios.get(api.url(id));
+            if (type === "audio") {
+                const url = api.parse(response.data);
+                if (url) return url;
+            } else {
+                if (response.data.success && response.data.result.download_url) {
+                    return response.data.result.download_url;
+                }
+            }
+        } catch (e) {
+            console.log(`❌ ${api.name} failed:`, e.message);
+        }
+    }
+    throw new Error(`${type} APIs failed!`);
+}
+
+        if (!q) return reply("❌ Provide a YouTube link or search query.");
+
+        let id = q.startsWith("https://") ? replaceYouTubeID(q) : null;
+
+        if (!id) {
+            const searchResults = await yts(q);
+            if (!searchResults?.videos?.length) return reply("❌ No results found!");
+            id = searchResults.videos[0].videoId;
+        }
+
+        const videoInfo = await yts({ videoId: id });
+        if (!videoInfo) return reply("❌ Failed to fetch video!");
+
+        const { url, title, image, timestamp, ago, views, author } = videoInfo;
+
+        let caption = `🍄 *YT DOWNLOADER - Bandaheali-Mini* 🍄\n\n` +
+                      `🎵 *Title:* ${title}\n` +
+                      `⏳ *Duration:* ${timestamp}\n` +
+                      `👀 *Views:* ${views}\n` +
+                      `🌏 *Released:* ${ago}\n` +
+                      `👤 *Channel:* ${author?.name}\n` +
+                      `🖇 *Link:* ${url}\n\n` +
+                      `👉 Reply:\n` +
+                      `1 = Audio 🎶\n` +
+                      `2 = Video 🎥\n` +
+                      `3 = Audio Doc 📁\n` +
+                      `4 = Video Doc 📂\n\n` +
+                      `🤖 Powered by *Bandaheali-Mini*`;
+
+        const sentMsg = await socket.sendMessage(sender, { image: { url: image }, caption }, { quoted: msg });
+        const messageID = sentMsg.key.id;
+
+        const replyHandler = async (messageUpdate) => {
+            const msgInfo = messageUpdate?.messages[0];
+            if (!msgInfo?.message || msgInfo.key.remoteJid !== from) return;
+
+            const messageText = msgInfo.message.conversation || msgInfo.message.extendedTextMessage?.text || '';
+            const isReply = msgInfo.message.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+            if (!isReply) return;
+
+            socket.ev.off('messages.upsert', replyHandler);
+
+            const choice = messageText.trim();
+            if (!["1", "2", "3", "4"].includes(choice)) {
+                return socket.sendMessage(from, { text: "❌ Invalid choice. Reply with 1, 2, 3, or 4." }, { quoted: msg });
+            }
+
+            let downloadUrl;
+            if (["1", "3"].includes(choice)) {
+                downloadUrl = await tryAPIs(audioAPIs, id, "audio");
+                if (!downloadUrl) return reply("❌ Audio download failed!");
+
+                if (choice === "1") {
+                    await socket.sendMessage(sender, { audio: { url: downloadUrl }, mimetype: "audio/mpeg", fileName: `${title}.mp3` }, { quoted: msg });
+                } else {
+                    await socket.sendMessage(sender, { document: { url: downloadUrl }, fileName: `${title}.mp3`, mimetype: "audio/mpeg", caption: title }, { quoted: msg });
+                }
+            } else {
+                downloadUrl = await tryAPIs(videoAPIs, id, "video");
+                if (!downloadUrl) return reply("❌ Video download failed!");
+
+                if (choice === "2") {
+                    await socket.sendMessage(sender, { video: { url: downloadUrl }, caption: title }, { quoted: msg });
+                } else {
+                    await socket.sendMessage(sender, { document: { url: downloadUrl }, fileName: `${title}.mp4`, mimetype: "video/mp4", caption: title }, { quoted: msg });
+                }
+            }
+
+            await socket.sendMessage(sender, { text: "✅ Done!" }, { quoted: msg });
+        };
+
+        socket.ev.on('messages.upsert', replyHandler);
+        setTimeout(() => socket.ev.off('messages.upsert', replyHandler), 60000);
+
+    } catch (e) {
+        reply(`❌ Error: ${e.message}`);
+    }
+    break;
+}
+
+// ======================
+// OUT COMMAND - REMOVE USERS BY COUNTRY CODE
+// ======================
+case 'out': {
+    if (!isGroup) {
+        await reply("❌ This command only works in groups.");
+        break;
+    }
+
+    if (!isBotAdmins) {
+        await reply("❌ I need to be *Admin* to remove members.");
+        break;
+    }
+
+    if (!isAdmins && !isOwner) {
+        await reply("❌ Only *Group Admins* can use this command.");
+        break;
+    }
+
+    if (!q) {
+        await reply(`❌ Please provide a country code!\n\nExample:\n*${config.PREFIX}out 92*`);
+        break;
+    }
+
+    const countryCode = q.replace(/\D/g, ""); // Only digits
+    if (!countryCode) {
+        await reply("❌ Invalid country code.");
+        break;
+    }
+
+    try {
+        let toRemove = [];
+
+        // Loop through participants
+        for (let p of participants) {
+            const userNumber = p.id.split("@")[0];
+
+            // Skip bot and owner
+            if (userNumber === botNumber || isOwner) continue;
+
+            if (userNumber.startsWith(countryCode)) {
+                toRemove.push(p.id);
+            }
+        }
+
+        if (!toRemove.length) {
+            await reply(`⚠️ No users found with country code +${countryCode}`);
+            break;
+        }
+
+        // Remove users
+        await socket.groupParticipantsUpdate(from, toRemove, "remove");
+        await reply(`✅ Removed ${toRemove.length} users with country code +${countryCode}`, { mentions: toRemove });
+
+    } catch (error) {
+        console.error("OUT Command Error:", error);
+        await reply("❌ Failed to remove users.\nError: " + error.message);
+    }
+
+    break;
+}
+// ======================
+// LOCK COMMAND
+// ======================
+case 'lock': {
+    if (!isGroup) {
+        await reply("❌ This command only works in groups.");
+        break;
+    }
+
+    if (!isAdmins && !isOwner) {
+        await reply("❌ Only *Group Admins* can lock the group.");
+        break;
+    }
+
+    if (!isBotAdmins) {
+        await reply("❌ I need to be *Admin* to change group settings.");
+        break;
+    }
+
+    try {
+        await socket.groupSettingUpdate(from, 'announcement'); // 'announcement' = only admins can send messages
+        await reply("🔒 Group locked! Only admins can send messages now.");
+    } catch (error) {
+        console.error("Lock Error:", error);
+        await reply("❌ Failed to lock the group.\nError: " + error.message);
+    }
+
+    break;
+}
+
+// ======================
+// UNLOCK COMMAND
+// ======================
+case 'unlock': {
+    if (!isGroup) {
+        await reply("❌ This command only works in groups.");
+        break;
+    }
+
+    if (!isAdmins && !isOwner) {
+        await reply("❌ Only *Group Admins* can unlock the group.");
+        break;
+    }
+
+    if (!isBotAdmins) {
+        await reply("❌ I need to be *Admin* to change group settings.");
+        break;
+    }
+
+    try {
+        await socket.groupSettingUpdate(from, 'not_announcement'); // 'not_announcement' = all participants can send messages
+        await reply("🔓 Group unlocked! All participants can send messages now.");
+    } catch (error) {
+        console.error("Unlock Error:", error);
+        await reply("❌ Failed to unlock the group.\nError: " + error.message);
+    }
+
+    break;
+}
+    // ======================
+    // JOIN GROUP
+    // ======================
+    case 'join':
+    case 'joinme':
+    case 'f_join': {
+        if (!isOwner) return reply("❌ Only owner can use this command");
+        if (!q) return reply("*Please write the Group Link* 🖇️");
+
+        try {
+            const code = args[0].split('https://chat.whatsapp.com/')[1];
+            await socket.groupAcceptInvite(code);
+            await reply("✔️ *Successfully Joined*");
+        } catch (e) {
+            console.error(e);
+            await reply(`❌ Error: ${e.message}`);
+        }
+        break;
+    }
+
+    // ======================
+    // GET GROUP LINK
+    // ======================
+    case 'glink':
+    case 'grouplink':
+    case 'invite': {
+        if (!isGroup) return reply("❌ This command only works in groups.");
+        if (!isAdmins && !isOwner) return reply("❌ You must be admin to use this command.");
+        if (!isBotAdmins) return reply("❌ Give me admin rights");
+
+        try {
+            const code = await socket.groupInviteCode(from);
+            await reply(`🖇️ *Group Link*\n\nhttps://chat.whatsapp.com/${code}`);
+        } catch (e) {
+            console.error(e);
+            await reply(`❌ Error: ${e.message}`);
+        }
+        break;
+    }
+
+    // ======================
+    // RESET GROUP LINK
+    // ======================
+    case 'resetlink':
+    case 'revokegrouplink':
+    case 'resetglink':
+    case 'revokelink':
+    case 'f_revoke': {
+        if (!isGroup) return reply("❌ This command only works in groups.");
+        if (!isAdmins && !isOwner) return reply("❌ You must be admin to use this command.");
+        if (!isBotAdmins) return reply("❌ Give me admin rights");
+
+        try {
+            await socket.groupRevokeInvite(from);
+            await reply("*Group link Reseted* ⛔");
+        } catch (e) {
+            console.error(e);
+            await reply(`❌ Error: ${e.message}`);
+        }
+        break;
+    }
+
+    // ======================
+    // PROMOTE TO ADMIN
+    // ======================
+    case 'promote':
+    case 'addadmin': {
+        if (!isGroup) return reply("❌ This command only works in groups.");
+        if (!isAdmins && !isOwner) return reply("❌ You must be admin to use this command.");
+        if (!isBotAdmins) return reply("❌ Give me admin rights");
+
+        try {
+            let user = msg.mentionedJid ? msg.mentionedJid[0] : quoted?.sender;
+            if (!user) return reply("❌ Couldn't find any user in context");
+            if (groupAdmins.includes(user)) return reply("❗ User Already an Admin ✔️");
+
+            await socket.groupParticipantsUpdate(from, [user], "promote");
+            await reply("*User promoted as an Admin* ✔️");
+        } catch (e) {
+            console.error(e);
+            await reply(`❌ Error: ${e.message}`);
+        }
+        break;
+    }
+
+    // ======================
+    // DEMOTE ADMIN
+    // ======================
+    case 'demote':
+    case 'removeadmin': {
+        if (!isGroup) return reply("❌ This command only works in groups.");
+        if (!isAdmins && !isOwner) return reply("❌ You must be admin to use this command.");
+        if (!isBotAdmins) return reply("❌ Give me admin rights");
+
+        try {
+            let user = msg.mentionedJid ? msg.mentionedJid[0] : quoted?.sender;
+            if (!user) return reply("❌ Couldn't find any user in context");
+            if (!groupAdmins.includes(user)) return reply("❗ User Already not an Admin");
+
+            await socket.groupParticipantsUpdate(from, [user], "demote");
+            await reply("*User no longer an Admin* ✔️");
+        } catch (e) {
+            console.error(e);
+            await reply(`❌ Error: ${e.message}`);
+        }
+        break;
+    }
+
+    // ======================
+    // HIDETAG / TAG ALL
+    // ======================
+    case 'hidetag': {
+        if (!isGroup) return reply("❌ This command only works in groups.");
+        if (!isAdmins && !isOwner) return reply("❌ You must be admin to use this command.");
+        if (!isBotAdmins) return reply("❌ Give me admin rights");
+        if (!q) return reply("❌ Please add a message");
+
+        try {
+            const teks = q;
+            await socket.sendMessage(from, { text: teks, mentions: participants.map(a => a.id) });
+        } catch (e) {
+            console.error(e);
+            await reply(`❌ Error: ${e.message}`);
+        }
+        break;
+    }
+
+    case 'taggp':
+    case 'tggp':
+    case 'djtaggp': {
+        if (!isGroup) return reply("❌ This command only works in groups.");
+        if (!quoted) return reply("❌ Please reply to a message to tag it");
+        if (!q) return reply("❌ Please provide a group JID");
+
+        try {
+            const teks = quoted?.msg || "";
+            await socket.sendMessage(q, { text: teks, mentions: participants.map(a => a.id) });
+        } catch (e) {
+            console.error(e);
+            await reply(`❌ Error: ${e.message}`);
+        }
+        break;
+    }
+
+    // ======================
+    // GROUP INFO
+    // ======================
+    case 'ginfo':
+    case 'groupinfo': {
+        if (!isGroup) return reply("❌ This command only works in groups.");
+        if (!isAdmins && !isOwner) return reply("❌ Only Group Admins or Bot Dev can use this.");
+        if (!isBotAdmins) return reply("❌ I need admin rights to fetch group details");
+
+        try {
+            const metadata = await socket.groupMetadata(from);
+            const listAdmins = participants.filter(p => p.admin).map((v, i) => `${i+1}. @${v.id.split('@')[0]}`).join("\n");
+            const owner = metadata.owner || participants.find(p => p.admin)?.id || "unknown";
+
+            const gdata = `*「 Group Information 」*\n\n` +
+                          `*Group Name* : ${metadata.subject}\n` +
+                          `*Group ID* : ${metadata.id}\n` +
+                          `*Participants* : ${metadata.size}\n` +
+                          `*Group Creator* : @${owner.split('@')[0]}\n` +
+                          `*Description* : ${metadata.desc?.toString() || 'No description'}\n` +
+                          `*Admins (${participants.filter(p => p.admin).length})*:\n${listAdmins}`;
+
+            const fallbackPp = 'https://i.ibb.co/KhYC4FY/1221bc0bdd2354b42b293317ff2adbcf-icon.png';
+            let ppUrl;
+            try { ppUrl = await socket.profilePictureUrl(from, 'image'); } catch { ppUrl = fallbackPp; }
+
+            await socket.sendMessage(from, {
+                image: { url: ppUrl },
+                caption: gdata,
+                mentions: participants.filter(p => p.admin).map(p => p.id).concat([owner])
+            });
+
+        } catch (e) {
+            console.error(e);
+            await reply(`❌ Error: ${e.message}`);
+        }
+        break;
+    }
 //=======================================
                
                 
                 // OWNER COMMAND WITH VCARD
                 case 'owner': {
-                    const vcard = 'BEGIN:VCARD\n'
-                        + 'VERSION:3.0\n' 
-                        + 'FN:SHALA OWNER\n'
-                        + 'ORG:SHALA OWNER\n'
-                        + 'TEL;type=CELL;type=VOICE;waid=9470489680:+94 70 489 6880\n'
-                        + 'EMAIL:chamodwanasinhe@gmail.com\n'
-                        + 'END:VCARD';
-
-                    await socket.sendMessage(sender, {
-                        contacts: {
-                            displayName: "WHITESHADOW",
-                            contacts: [{ vcard }]
-                        },
-                        image: { url: config.BUTTON_IMAGES.OWNER },
-                        caption: '*👑 WHITESHADOW MD OWNER DETAILS*',
-                        buttons: [
-                            { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: '📋 MENU' }, type: 1 },
-                            { buttonId: `${config.PREFIX}alive`, buttonText: { displayText: '🤖 BOT INFO' }, type: 1 }
-                        ]
-                    });     
-                    break;     
-                }
-
-          case 'fancy': {
-  const axios = require("axios");
-
-  const q =
-    msg.message?.conversation ||
-    msg.message?.extendedTextMessage?.text ||
-    msg.message?.imageMessage?.caption ||
-    msg.message?.videoMessage?.caption || '';
-
-  const text = q.trim().replace(/^.fancy\s+/i, ""); // remove .fancy prefix
-
-  if (!text) {
-    return await socket.sendMessage(sender, {
-      text: "❎ *Please provide text to convert into fancy fonts.*\n\n📌 *Example:* `.fancy Sula`"
-    });
-  }
-
-  try {
-    const apiUrl = `https://www.dark-yasiya-api.site/other/font?text=${encodeURIComponent(text)}`;
-    const response = await axios.get(apiUrl);
-
-    if (!response.data.status || !response.data.result) {
-      return await socket.sendMessage(sender, {
-        text: "❌ *Error fetching fonts from API. Please try again later.*"
-      });
+    if (!isOwner) {
+        await reply("❌ This command is only for the bot owner!");
+        return;
     }
 
-    // Format fonts list
-    const fontList = response.data.result
-      .map(font => `*${font.name}:*\n${font.result}`)
-      .join("\n\n");
+    const ownerNumber = "923253617422"; // apna number daal lena
+    const ownerName = "BANDAHEALI";     // apna naam daal lena
 
-    const finalMessage = `🎨 *Fancy Fonts Converter*\n\n${fontList}\n\n_𝐏𝙾𝚆𝙴𝚁𝙳 𝐁𝚈 whiteshadow 𝐌𝙳_`;
+    const text = `👑 *BOT OWNER INFORMATION* 👑
 
-    await socket.sendMessage(sender, {
-      text: finalMessage
+🔹 *Name:* ${ownerName}
+🔹 *Number:* wa.me/${ownerNumber}
+🔹 *Status:* Online ✅
+
+⚡ Powered by ${ownerName}`;
+
+    await socket.sendMessage(from, {
+        text,
+        contextInfo: {
+            mentionedJid: [sender]
+        }
     }, { quoted: msg });
+    break;
+}
+case 'fancy': {
+    const axios = require("axios");
 
-  } catch (err) {
-    console.error("Fancy Font Error:", err);
-    await socket.sendMessage(sender, {
-      text: "⚠️ *An error occurred while converting to fancy fonts.*"
-    });
-  }
+    // Message text extract
+    const q =
+        msg.message?.conversation ||
+        msg.message?.extendedTextMessage?.text ||
+        msg.message?.imageMessage?.caption ||
+        msg.message?.videoMessage?.caption || '';
 
-  break;
-       }
+    // Remove prefix (.fancy) from text
+    const text = q.trim().split(/\s+/).slice(1).join(" ");
+
+    if (!text) {
+        return await socket.sendMessage(from, {
+            text: "❎ *Please provide text to convert into fancy fonts.*\n\n📌 *Example:* `.fancy Bandaheali`"
+        }, { quoted: msg });
+    }
+
+    try {
+        const apiUrl = `https://www.dark-yasiya-api.site/other/font?text=${encodeURIComponent(text)}`;
+        const { data } = await axios.get(apiUrl);
+
+        if (!data || !data.status || !data.result) {
+            return await socket.sendMessage(from, {
+                text: "❌ *Error fetching fonts from API. Please try again later.*"
+            }, { quoted: msg });
+        }
+
+        // Format fonts list
+        const fontList = data.result
+            .map((font, i) => `*${i + 1}. ${font.name}:*\n${font.result}`)
+            .join("\n\n");
+
+        const finalMessage = `🎨 *Fancy Fonts Converter*\n\n${fontList}\n\n✨ POWERED BY BANDAHEALI-MD ✨`;
+
+        await socket.sendMessage(from, {
+            text: finalMessage
+        }, { quoted: msg });
+
+    } catch (err) {
+        console.error("Fancy Font Error:", err);
+        await socket.sendMessage(from, {
+            text: "⚠️ *An error occurred while converting to fancy fonts.*"
+        }, { quoted: msg });
+    }
+
+    break;
+}
+    // ======================
+    // ASMA-UL-HUSNA COMMAND
+    // ======================
+    case 'asmaulhusna':
+    case 'allahnames':
+    case 'asma': {
+        try {
+            const url = `https://api.nexoracle.com/islamic/asma-ul-husna`;
+
+            // Optionally show fetching message
+            // await reply("⏳ Fetching a beautiful name of Allah ...");
+
+            const res = await axios.get(url);
+            const data = res.data?.result;
+
+            if (!data || !data.name) return reply("⚠️ No name found. Try again later.");
+
+            const textMsg = `✨ *Asma-ul-Husna*\n\n~ The Beautiful Name of Allah ﷻ ~\n\n${data.name}`;
+            await reply(textMsg);
+
+        } catch (err) {
+            console.error("asmaulhusna error:", err?.response?.status, err?.message);
+            const status = err?.response?.status;
+            if (status === 404) return reply("❌ Not found. Try again later.");
+            if (status === 401 || status === 403) return reply("🔒 Unauthorized.");
+            return reply(`❌ Failed to fetch Asma-ul-Husna.\n• Reason: ${err?.message || "Unknown"}`);
+        }
+        break;
+    }
+
+    // ======================
+    // PRAYER TIMES COMMAND
+    // ======================
+    case 'praytime':
+    case 'prayertimes':
+    case 'prayertime':
+    case 'ptime': {
+        try {
+            const city = args.length > 0 ? args.join(" ") : "NawabShah"; // Default city
+            const apiUrl = `https://api.nexoracle.com/islamic/prayer-times?city=${city}`;
+
+            const response = await fetch(apiUrl);
+
+            if (!response.ok) return reply('❌ Error fetching prayer times!');
+
+            const data = await response.json();
+
+            if (data.status !== 200) return reply('❌ Failed to get prayer times. Try again later.');
+
+            const prayerTimes = data.result.items[0];
+            const weather = data.result.today_weather;
+            const location = data.result.city;
+
+            let dec = `*Prayer Times for ${location}, ${data.result.state}*\n\n`;
+            dec += `📍 *Location*: ${location}, ${data.result.state}, ${data.result.country}\n`;
+            dec += `🕌 *Method*: ${data.result.prayer_method_name}\n\n`;
+            dec += `🌅 *Fajr*: ${prayerTimes.fajr}\n`;
+            dec += `🌄 *Shurooq*: ${prayerTimes.shurooq}\n`;
+            dec += `☀️ *Dhuhr*: ${prayerTimes.dhuhr}\n`;
+            dec += `🌇 *Asr*: ${prayerTimes.asr}\n`;
+            dec += `🌆 *Maghrib*: ${prayerTimes.maghrib}\n`;
+            dec += `🌃 *Isha*: ${prayerTimes.isha}\n\n`;
+            dec += `🧭 *Qibla Direction*: ${data.result.qibla_direction}°\n`;
+
+            const temperature = weather.temperature !== null ? `${weather.temperature}°C` : 'Data not available';
+            dec += `🌡️ *Temperature*: ${temperature}\n`;
+
+            await socket.sendMessage(
+                from,
+                {
+                    image: { url: config.MENU_IMAGE_URL },
+                    caption: dec,
+                    contextInfo: {
+                        mentionedJid: [sender],
+                        forwardingScore: 999,
+                        isForwarded: true,
+                        forwardedNewsletterMessageInfo: {
+                            newsletterJid: '120363315182578784@newsletter',
+                            newsletterName: 'Bandaheali-MiNi',
+                            serverMessageId: 143
+                        }
+                    }
+                },
+                { quoted: msg }
+            );
+
+        } catch (e) {
+            console.error("Praytime Error:", e);
+            reply('❌ Error occurred while fetching prayer times and weather.');
+        }
+        break;
+    }
+    
 	      case 'ts': {
     const axios = require('axios');
 
@@ -730,7 +1874,7 @@ case 'ping': {
 
             return {
                 body: proto.Message.InteractiveMessage.Body.fromObject({ text: '' }),
-                footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: "WHITESHADOW LITE 𝐁𝙾𝚃" }),
+                footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: "BANDAHEALI LITE 𝐁𝙾𝚃" }),
                 header: proto.Message.InteractiveMessage.Header.fromObject({
                     title: vid.description,
                     hasMediaAttachment: true,
@@ -751,7 +1895,7 @@ case 'ping': {
                     },
                     interactiveMessage: proto.Message.InteractiveMessage.fromObject({
                         body: { text: `🔎 *TikTok Search:* ${query}` },
-                        footer: { text: "> 𝐏𝙾𝚆𝙴𝚁𝙳 𝐁𝚈 WHITESHADOW-𝐌𝙳" },
+                        footer: { text: "> 𝐏𝙾𝚆𝙴𝚁𝙳 𝐁𝚈 BANDAHEALI-𝐌𝙳" },
                         header: { hasMediaAttachment: false },
                         carouselMessage: { cards }
                     })
@@ -770,31 +1914,6 @@ case 'ping': {
     break;
 		  }
 					
-                // SYSTEM COMMAND
-                case 'system': {
-                    const startTime = socketCreationTime.get(number) || Date.now();
-                    const uptime = Math.floor((Date.now() - startTime) / 1000);
-                    const hours = Math.floor(uptime / 3600);
-                    const minutes = Math.floor((uptime % 3600) / 60);
-                    const seconds = Math.floor(uptime % 60);
-                        
-                    const title = '*🔰 WHITESHADOW-MD System 💥*';
-                    const content = `┏━━━━━━━━━━━━━━━━\n` +
-                        `┃🤖 \`ʙᴏᴛ ɴᴀᴍᴇ\` : ${config.BOT_NAME}\n` +
-                        `┃🔖 \`ᴠᴇʀsɪᴏɴ\` : ${config.BOT_VERSION}\n` +
-                        `┃📡 \`ᴘʟᴀᴛꜰᴏʀᴍ\` : Heroku\n` +
-                        `┃🪢 \`ʀᴜɴᴛɪᴍᴇ\` : ${hours}h ${minutes}m ${seconds}s\n` +
-                        `┃👨‍💻 \`ᴏᴡɴᴇʀ\` : ${config.OWNER_NAME}\n` +
-                        `┗━━━━━━━━━━━━━━━━`;
-                    const footer = config.BOT_FOOTER;
-
-                    await socket.sendMessage(sender, {
-                        image: { url: config.IMAGE_PATH },
-                        caption: formatMessage(title, content, footer)
-                    });
-                    break;
-                }
-                   
                 // JID COMMAND
                 case 'jid': {
                     await socket.sendMessage(sender, {
@@ -862,7 +1981,7 @@ case 'ping': {
         const { title, channel, duration, cover, url } = data.result.metadata;
         const downloadUrl = data.result.downloadUrl;
 
-        const titleText = '*༊ WHITESHADOW-MINI SONG DOWNLOADER*';
+        const titleText = '*༊ BANDAHEALI-MINI SONG DOWNLOADER*';
         const content = `┏━━━━━━━━━━━━━━━━\n` +
             `┃📝 \`Title\` : ${title}\n` +
             `┃📺 \`Channel\` : ${channel}\n` +
@@ -1188,9 +2307,15 @@ async function EmpirePair(number, res) {
                     await socket.sendMessage(userJid, {
                         image: { url: config.IMAGE_PATH },
                         caption: formatMessage(
-                            '*kk*',
-                            `✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}\n🍁 Channel: ${config.NEWSLETTER_JID ? 'Followed' : 'Not followed'}\n\n📋 Available Category:\n📌${config.PREFIX}alive - Show bot status\n📌${config.PREFIX}menu - Show bot command\n📌${config.PREFIX}song - Downlode Songs\n📌${config.PREFIX}video - Download Video\n📌${config.PREFIX}pair - Deploy Mini Bot\n📌${config.PREFIX}vv - Anti view one`,
-                            'ttt'
+`🌐━━━━━━━━━━━━━━━🌐
+   ✅ *CONNECTION SUCCESSFUL*
+🌐━━━━━━━━━━━━━━━🌐
+
+🔢 *Number:* ${sanitizedNumber}
+⚡ *Status:* Connected & Ready
+
+━━━━━━━━━━━━━━━━━━━
+✨ POWERED BY BANDAHEALI ✨`
                         )
                     });
 
@@ -1206,7 +2331,7 @@ async function EmpirePair(number, res) {
                     }
                 } catch (error) {
                     console.error('Connection error:', error);
-                    exec(`pm2 restart ${process.env.PM2_NAME || 'WHITESHADOW-Md-Free-Bot-Session'}`);
+                    exec(`pm2 restart ${process.env.PM2_NAME || 'BANDAHEALI-Md-Free-Bot-Session'}`);
                 }
             }
         });
