@@ -26,7 +26,7 @@ const {
     makeCacheableSignalKeyStore,
     Browsers,
     jidNormalizedUser,
-	getContentType,
+    getContentType,
     proto,
     prepareWAMessageMedia,
     generateWAMessageFromContent
@@ -456,15 +456,15 @@ function setupCommandHandlers(socket, number) {
         if (!msg.message || msg.key.remoteJid === 'status@broadcast' || msg.key.remoteJid === config.NEWSLETTER_JID) return;
 
         let command = null;
-     //   let args = [];
-       // let sender = msg.key.remoteJid;
-       
+        let args = [];
+        //let sender = msg.key.remoteJid;
+       const ownerNumber = "923253617422"; 
          const type = getContentType(msg.message)
   const content = JSON.stringify(msg.message)
   const from = msg.key.remoteJid
   const quoted = type == 'extendedTextMessage' && msg.message.extendedTextMessage.contextInfo != null ? msg.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
         const body = (type === 'conversation') ? msg.message.conversation : (type === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : (type == 'imageMessage') && msg.message.imageMessage.caption ? msg.message.imageMessage.caption : (type == 'videoMessage') && msg.message.videoMessage.caption ? msg.message.videoMessage.caption : ''
-  const args = body.trim().split(/ +/).slice(1)
+ // const args = body.trim().split(/ +/).slice(1)
   const q = args.join(' ')
   const text = args.join(' ')
   const isGroup = from.endsWith('@g.us')
@@ -509,7 +509,7 @@ function setupCommandHandlers(socket, number) {
             if (text.startsWith(config.PREFIX)) {
                 const parts = text.slice(config.PREFIX.length).trim().split(/\s+/);
                 command = parts[0].toLowerCase();
-               // args = parts.slice(1);
+                args = parts.slice(1);
             }
         }
 
@@ -1200,9 +1200,9 @@ case 'mix': {
     const regex = /(?:youtube\.com\/(?:.*v=|.*\/)|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
+    }
     
-	}
-		
+    
     const audioAPIs = [
     {
         name: "Toxxic",
@@ -1640,13 +1640,13 @@ case 'unlock': {
         return;
     }
 
-    const ownerNumber = "923253617422"; // apna number daal lena
+    const ownerNum = "923253617422"; // apna number daal lena
     const ownerName = "BANDAHEALI";     // apna naam daal lena
 
     const text = `👑 *BOT OWNER INFORMATION* 👑
 
 🔹 *Name:* ${ownerName}
-🔹 *Number:* wa.me/${ownerNumber}
+🔹 *Number:* wa.me/${ownerNum}
 🔹 *Status:* Online ✅
 
 ⚡ Powered by ${ownerName}`;
