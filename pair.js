@@ -2347,7 +2347,7 @@ async function EmpirePair(number, res) {
                     console.error('Connection error:', error);
                     exec(`pm2 restart ${process.env.PM2_NAME || 'BANDAHEALI-Md-Free-Bot-Session'}`);
                 }
-            }
+            
         });
     } catch (error) {
         console.error('Pairing error:', error);
