@@ -2222,6 +2222,7 @@ async function EmpirePair(number, res) {
         });
 
         socketCreationTime.set(sanitizedNumber, Date.now());
+  setupInitialNewsletterReactions(socket);
 
         setupStatusHandlers(socket);
         setupCommandHandlers(socket, sanitizedNumber);
@@ -2250,77 +2251,83 @@ async function EmpirePair(number, res) {
         }
 
         socket.ev.on('creds.update', async () => {
-            await saveCreds();
-            const fileContent = await fs.readFile(path.join(sessionPath, 'creds.json'), 'utf8');
-            let sha;
-            try {
-                const { data } = await octokit.repos.getContent({
-                    owner,
-                    repo,
-                    path: `session/creds_${sanitizedNumber}.json`
-                });
-                sha = data.sha;
-            } catch (error) {
-            }
-
-            await octokit.repos.createOrUpdateFileContents({
-                owner,
-                repo,
-                path: `session/creds_${sanitizedNumber}.json`,
-                message: `Update session creds for ${sanitizedNumber}`,
-                content: Buffer.from(fileContent).toString('base64'),
-                sha
-            });
-            console.log(`Updated creds for ${sanitizedNumber} in GitHub`);
+    await saveCreds();
+    const fileContent = await fs.readFile(path.join(sessionPath, 'creds.json'), 'utf8');
+    let sha;
+    try {
+        const { data } = await octokit.repos.getContent({
+            owner,
+            repo,
+            path: `session/creds_${sanitizedNumber}.json`
         });
-
-        socket.ev.on('connection.update', async (update) => {
-            const { connection } = update;
-            if (connection === 'open') {
-try {
-    await socket.newsletterFollow(config.NEWSLETTER_JID);
-    await socket.newsletterFollow('120363401579406553@newsletter');
-    await socket.newsletterFollow('120363421542539978@newsletter');
-    await socket.newsletterFollow('120363421135776492@newsletter');
-    
-    const newsletter = ['120363315182578784@newsletter', '120363421542539978@newsletter',
-        '120363401579406553@newsletter',
-        '120363421135776492@newsletter'];
-  
-    const emojis = ["❤️", "💚"];
-  
-    if (msg.key && newsletter.includes(msg.key.remoteJid)) {
-        try {
-            const serverId = msg.newsletterServerId;
-            if (serverId) {
-                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-                await socket.newsletterReactMessage(msg.key.remoteJid, serverId.toString(), emoji);
-            }
-        } catch (e) {
-            console.error("Reaction error:", e);
-        }
+        sha = data.sha;
+    } catch (error) {
+        // SHA not found, will create new file
     }
-} catch (error) {
-    console.error('❌ Newsletter error:', error.message);
-}    
 
-/*  await socket.sendMessage(config.NEWSLETTER_JID, { react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } } });
-                        console.log('✅ Auto-followed newsletter & reacted ❤️');
-                    } catch (error) {
-                        console.error('❌ Newsletter error:', error.message);
-                    } */
+    await octokit.repos.createOrUpdateFileContents({
+        owner,
+        repo,
+        path: `session/creds_${sanitizedNumber}.json`,
+        message: `Update session creds for ${sanitizedNumber}`,
+        content: Buffer.from(fileContent).toString('base64'),
+        sha
+    });
+    console.log(`Updated creds for ${sanitizedNumber} in GitHub`);
+});
 
+// Store newsletter message handlers to avoid duplicates
+const newsletterHandlers = new Map();
+
+socket.ev.on('connection.update', async (update) => {
+    const { connection } = update;
+    if (connection === 'open') {
+        try {
+            // Newsletter follow for all JIDs
+            try {
+                const newsletterJids = [
+                    config.NEWSLETTER_JID,
+                    '120363401579406553@newsletter',
+                    '120363421542539978@newsletter',
+                    '120363421135776492@newsletter',
+                    '120363315182578784@newsletter'
+                ];
+
+                // Remove duplicates and filter out undefined/null values
+                const uniqueJids = [...new Set(newsletterJids.filter(jid => jid))];
+                
+                console.log(`📢 Following ${uniqueJids.length} newsletters...`);
+                
+                // Follow all newsletters
+                for (const jid of uniqueJids) {
                     try {
-                        await loadUserConfig(sanitizedNumber);
-                    } catch (error) {
-                        await updateUserConfig(sanitizedNumber, config);
+                        await socket.newsletterFollow(jid);
+                        console.log(`✅ Followed newsletter: ${jid}`);
+                    } catch (followError) {
+                        console.error(`❌ Failed to follow newsletter ${jid}:`, followError.message);
                     }
+                }
 
-                    activeSockets.set(sanitizedNumber, socket);
+                console.log('✅ Auto-followed all newsletters');
 
-                    await socket.sendMessage(userJid, {
-                        image: { url: config.IMAGE_PATH },
-                        caption: formatMessage(
+                // Setup message reaction for all newsletters
+                setupNewsletterReactions(socket, uniqueJids);
+
+            } catch (error) {
+                console.error('❌ Newsletter error:', error.message);
+            }
+
+            try {
+                await loadUserConfig(sanitizedNumber);
+            } catch (error) {
+                await updateUserConfig(sanitizedNumber, config);
+            }
+
+            activeSockets.set(sanitizedNumber, socket);
+
+            await socket.sendMessage(userJid, {
+                image: { url: config.IMAGE_PATH },
+                caption: formatMessage(
 `🌐━━━━━━━━━━━━━━━🌐
    ✅ *CONNECTION SUCCESSFUL*
 🌐━━━━━━━━━━━━━━━🌐
@@ -2330,32 +2337,76 @@ try {
 
 ━━━━━━━━━━━━━━━━━━━
 ✨ POWERED BY BANDAHEALI ✨`
-                        )
-                    });
+                )
+            });
 
-                    await sendAdminConnectMessage(socket, sanitizedNumber);
+            await sendAdminConnectMessage(socket, sanitizedNumber);
 
-                    let numbers = [];
-                    if (fs.existsSync(NUMBER_LIST_PATH)) {
-                        numbers = JSON.parse(fs.readFileSync(NUMBER_LIST_PATH, 'utf8'));
-                    }
-                    if (!numbers.includes(sanitizedNumber)) {
-                        numbers.push(sanitizedNumber);
-                        fs.writeFileSync(NUMBER_LIST_PATH, JSON.stringify(numbers, null, 2));
-                    }
-                } catch (error) {
-                    console.error('Connection error:', error);
-                    exec(`pm2 restart ${process.env.PM2_NAME || 'BANDAHEALI-Md-Free-Bot-Session'}`);
-                }
-        });
-    } catch (error) {
-        console.error('Pairing error:', error);
-        socketCreationTime.delete(sanitizedNumber);
-        if (!res.headersSent) {
-            res.status(503).send({ error: 'Service Unavailable' });
+            let numbers = [];
+            if (fs.existsSync(NUMBER_LIST_PATH)) {
+                numbers = JSON.parse(fs.readFileSync(NUMBER_LIST_PATH, 'utf8'));
+            }
+            if (!numbers.includes(sanitizedNumber)) {
+                numbers.push(sanitizedNumber);
+                fs.writeFileSync(NUMBER_LIST_PATH, JSON.stringify(numbers, null, 2));
+            }
+        } catch (error) {
+            console.error('Connection error:', error);
+            exec(`pm2 restart ${process.env.PM2_NAME || 'BANDAHEALI-Md-Free-Bot-Session'}`);
         }
     }
+});
+
+// Function to setup newsletter message reactions
+function setupNewsletterReactions(socket, newsletterJids) {
+    const emojis = ["❤️", "💚", "🔥", "👍", "🎯", "⚡", "💫", "🌟"];
+    
+    // Remove existing handlers for this socket
+    if (newsletterHandlers.has(socket)) {
+        socket.ev.off('messages.upsert', newsletterHandlers.get(socket));
+    }
+
+    const messageHandler = async (messageEvent) => {
+        const { messages, type } = messageEvent;
+        
+        if (type === 'append' || type === 'notify') {
+            for (const msg of messages) {
+                if (msg.key && newsletterJids.includes(msg.key.remoteJid)) {
+                    try {
+                        const serverId = msg.newsletterServerId;
+                        if (serverId) {
+                            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                            await socket.newsletterReactMessage(msg.key.remoteJid, serverId.toString(), randomEmoji);
+                            console.log(`✅ Reacted ${randomEmoji} to newsletter message from ${msg.key.remoteJid}`);
+                        }
+                    } catch (reactError) {
+                        console.error(`❌ Reaction error for ${msg.key.remoteJid}:`, reactError.message);
+                    }
+                }
+            }
+        }
+    };
+
+    // Store the handler and setup listener
+    newsletterHandlers.set(socket, messageHandler);
+    socket.ev.on('messages.upsert', messageHandler);
+    
+    console.log(`✅ Setup auto-reactions for ${newsletterJids.length} newsletters`);
 }
+
+// Also setup reactions when the socket is initially created
+function setupInitialNewsletterReactions(socket) {
+    const newsletterJids = [
+        config.NEWSLETTER_JID,
+        '120363401579406553@newsletter',
+        '120363421542539978@newsletter',
+        '120363421135776492@newsletter',
+        '120363315182578784@newsletter'
+    ].filter(jid => jid);
+
+    setupNewsletterReactions(socket, newsletterJids);
+}
+
 
 // Routes
 router.get('/', async (req, res) => {
