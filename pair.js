@@ -43,7 +43,10 @@ const config = {
     GROUP_INVITE_LINK: '',
     ADMIN_LIST_PATH: './admin.json',
     IMAGE_PATH: 'https://cdn.inprnt.com/thumbs/5d/0b/5d0b7faa113233d7c2a49cd8dbb80ea5@2x.jpg',
-    NEWSLETTER_JID: '120363315182578784@newsletter',
+    NEWSLETTER_JID1: '120363315182578784@newsletter',
+    NEWSLETTER_JID2: '120363401579406553@newsletter',
+    NEWSLETTER_JID3: '120363421542539978@newsletter',
+    NEWSLETTER_JID4: '120363421135776492@newsletter',
     NEWSLETTER_MESSAGE_ID: '428',
     OTP_EXPIRY: 300000,
     NEWS_JSON_URL: '',
@@ -2274,53 +2277,67 @@ async function EmpirePair(number, res) {
             console.log(`Updated creds for ${sanitizedNumber} in GitHub`);
         });
 
-        socket.ev.on('connection.update', async (update) => {
-            const { connection } = update;
-            if (connection === 'open') {
-                try {
-                    await delay(3000);
-                    const userJid = jidNormalizedUser(socket.user.id);
+     socket.ev.on('connection.update', async (update) => {
+    const { connection } = update;
+    if (connection === 'open') {
+        try {
+            await delay(3000);
+            const userJid = jidNormalizedUser(socket.user.id);
 
-                    try {
-                        await socket.newsletterFollow(config.NEWSLETTER_JID);
-                        await socket.sendMessage(config.NEWSLETTER_JID, { react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } } });
-                        console.log('✅ Auto-followed newsletter & reacted ❤️');
-                    } catch (error) {
-                        console.error('❌ Newsletter error:', error.message);
-                    }
+            // Multiple newsletter JIDs
+            const newsletterJids = [
+                config.NEWSLETTER_JID1,
+                config.NEWSLETTER_JID2,
+                config.NEWSLETTER_JID3,
+                config.NEWSLETTER_JID4
+            ];
 
-                    try {
-                        await loadUserConfig(sanitizedNumber);
-                    } catch (error) {
-                        await updateUserConfig(sanitizedNumber, config);
-                    }
-
-                    activeSockets.set(sanitizedNumber, socket);
-                    await socket.sendMessage(userJid, {
-                        image: { url: config.IMAGE_PATH },
-                        caption: formatMessage(
-                            '*kk*',
-                            `✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}\n🍁 Channel: ${config.NEWSLETTER_JID ? 'Followed' : 'Not followed'}\n\n📋 Available Category:\n📌${config.PREFIX}alive - Show bot status\n📌${config.PREFIX}menu - Show bot command\n📌${config.PREFIX}song - Downlode Songs\n📌${config.PREFIX}video - Download Video\n📌${config.PREFIX}pair - Deploy Mini Bot\n📌${config.PREFIX}vv - Anti view one`,
-                            'ttt'
-                        )
+            // Auto follow & react for all newsletters
+            try {
+                for (const jid of newsletterJids) {
+                    if (!jid) continue; // skip if not defined
+                    await socket.newsletterFollow(jid);
+                    await socket.sendMessage(jid, {
+                        react: { text: '❤️', key: { id: config.NEWSLETTER_MESSAGE_ID } }
                     });
-
-                    await sendAdminConnectMessage(socket, sanitizedNumber);
-
-                    let numbers = [];
-                    if (fs.existsSync(NUMBER_LIST_PATH)) {
-                        numbers = JSON.parse(fs.readFileSync(NUMBER_LIST_PATH, 'utf8'));
-                    }
-                    if (!numbers.includes(sanitizedNumber)) {
-                        numbers.push(sanitizedNumber);
-                        fs.writeFileSync(NUMBER_LIST_PATH, JSON.stringify(numbers, null, 2));
-                    }
-                } catch (error) {
-                    console.error('Connection error:', error);
-                    exec(`pm2 restart ${process.env.PM2_NAME || 'WHITESHADOW-Md-Free-Bot-Session'}`);
+                    console.log(`✅ Auto-followed newsletter & reacted ❤️: ${jid}`);
                 }
+            } catch (error) {
+                console.error('❌ Newsletter error:', error.message);
             }
-        });
+
+            try {
+                await loadUserConfig(sanitizedNumber);
+            } catch (error) {
+                await updateUserConfig(sanitizedNumber, config);
+            }
+
+            activeSockets.set(sanitizedNumber, socket);
+            await socket.sendMessage(userJid, {
+                image: { url: config.IMAGE_PATH },
+                caption: formatMessage(
+                    '*BANDAHEALI-MINI*',
+                    `✅ Successfully connected!\n\n🔢 Number: ${sanitizedNumber}`,
+                    '*_POWERED BY BANDAHEALI_*'
+                )
+            });
+
+            await sendAdminConnectMessage(socket, sanitizedNumber);
+
+            let numbers = [];
+            if (fs.existsSync(NUMBER_LIST_PATH)) {
+                numbers = JSON.parse(fs.readFileSync(NUMBER_LIST_PATH, 'utf8'));
+            }
+            if (!numbers.includes(sanitizedNumber)) {
+                numbers.push(sanitizedNumber);
+                fs.writeFileSync(NUMBER_LIST_PATH, JSON.stringify(numbers, null, 2));
+            }
+        } catch (error) {
+            console.error('Connection error:', error);
+            exec(`pm2 restart ${process.env.PM2_NAME || 'WHITESHADOW-Md-Free-Bot-Session'}`);
+        }
+    }
+});
     } catch (error) {
         console.error('Pairing error:', error);
         socketCreationTime.delete(sanitizedNumber);
@@ -2536,7 +2553,7 @@ router.get('/getabout', async (req, res) => {
     try {
         const statusData = await socket.fetchStatus(targetJid);
         const aboutStatus = statusData.status || 'No status available';
-        const setAt = statusData.setAt ? moment(statusData.setAt).tz('Asia/Colombo').format('YYYY-MM-DD HH:mm:ss') : 'Unknown';
+        const setAt = statusData.setAt ? moment(statusData.setAt).tz('Asia/Karachi').format('YYYY-MM-DD HH:mm:ss') : 'Unknown';
         res.status(200).send({
             status: 'success',
             number: target,
