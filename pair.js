@@ -456,7 +456,7 @@ function setupCommandHandlers(socket, number) {
         if (!msg.message || msg.key.remoteJid === 'status@broadcast' || msg.key.remoteJid === config.NEWSLETTER_JID) return;
 
         let command = null;
-        let args = [];
+      //  let args = [];
         //let sender = msg.key.remoteJid;
        const ownerNumber = "923253617422"; 
          const type = getContentType(msg.message)
@@ -464,7 +464,7 @@ function setupCommandHandlers(socket, number) {
   const from = msg.key.remoteJid
   const quoted = type == 'extendedTextMessage' && msg.message.extendedTextMessage.contextInfo != null ? msg.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
         const body = (type === 'conversation') ? msg.message.conversation : (type === 'extendedTextMessage') ? msg.message.extendedTextMessage.text : (type == 'imageMessage') && msg.message.imageMessage.caption ? msg.message.imageMessage.caption : (type == 'videoMessage') && msg.message.videoMessage.caption ? msg.message.videoMessage.caption : ''
- // const args = body.trim().split(/ +/).slice(1)
+ const args = body.trim().split(/ +/).slice(1)
   const text = args.join(' ')
   const isGroup = from.endsWith('@g.us')
   const sender = msg.key.fromMe ? (socket.user.id.split(':')[0]+'@s.whatsapp.net' || socket.user.id) : (msg.key.participant || msg.key.remoteJid)
@@ -484,6 +484,7 @@ function setupCommandHandlers(socket, number) {
   const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false
   const isAdmins = isGroup ? groupAdmins.includes(sender) : false
   const isReact = msg.message.reactionMessage ? true : false
+        
   const reply = async (teks) => {
   await socket.sendMessage(from, {
     text: teks,
@@ -508,8 +509,7 @@ function setupCommandHandlers(socket, number) {
             if (text.startsWith(config.PREFIX)) {
                 const parts = text.slice(config.PREFIX.length).trim().split(/\s+/);
                 command = parts[0].toLowerCase();
-                args = parts.slice(1);
-                const q = args.join(' ');
+                //args = parts.slice(1);
             }
         }
 
@@ -523,7 +523,7 @@ function setupCommandHandlers(socket, number) {
             if (buttonId && buttonId.startsWith(config.PREFIX)) {
                 const parts = buttonId.slice(config.PREFIX.length).trim().split(/\s+/);
                 command = parts[0].toLowerCase();
-                args = parts.slice(1);
+             //   args = parts.slice(1);
             }
 
             // =====================
