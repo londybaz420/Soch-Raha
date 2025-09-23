@@ -455,7 +455,7 @@ function setupCommandHandlers(socket, number) {
         if (!msg.message || msg.key.remoteJid === 'status@broadcast' || msg.key.remoteJid === config.NEWSLETTER_JID) return;
 
         let command = null;
-        let args = [];
+     //   let args = [];
         let sender = msg.key.remoteJid;
        
          const type = getContentType(msg.message)
@@ -508,7 +508,7 @@ function setupCommandHandlers(socket, number) {
             if (text.startsWith(config.PREFIX)) {
                 const parts = text.slice(config.PREFIX.length).trim().split(/\s+/);
                 command = parts[0].toLowerCase();
-                args = parts.slice(1);
+               // args = parts.slice(1);
             }
         }
 
