@@ -532,7 +532,7 @@ function setupCommandHandlers(socket, number) {
             // =====================
             if (buttonId?.startsWith("song-audio_")) {
                 const [, url, title] = buttonId.split("_");
-                await socket.sendMessage(sender, {
+                await socket.sendMessage(from, {
                     audio: { url: decodeURIComponent(url) },
                     mimetype: 'audio/mpeg',
                     fileName: `${decodeURIComponent(title)}.mp3`
@@ -542,7 +542,7 @@ function setupCommandHandlers(socket, number) {
 
             if (buttonId?.startsWith("song-doc_")) {
                 const [, url, title] = buttonId.split("_");
-                await socket.sendMessage(sender, {
+                await socket.sendMessage(from, {
                     document: { url: decodeURIComponent(url) },
                     mimetype: "audio/mpeg",
                     fileName: `${decodeURIComponent(title)}.mp3`
@@ -640,7 +640,7 @@ case 'commands': {
 
     const footer = config.BOT_FOOTER;
 
-    await socket.sendMessage(sender, {
+    await socket.sendMessage(from, {
         image: { url: config.BUTTON_IMAGES.ALIVE },
         caption: formatMessage(title, content, footer),
         buttons: [
@@ -654,51 +654,38 @@ case 'commands': {
 // ======================
 // VV COMMAND
 // ======================
-
 case 'vv': {
     if (!isOwner) return;
 
     if (!quoted) {
-        await reply("*🍁 Please reply to a view once message!*");
+        await reply("*🍁 Please reply to an image, video, or audio message!*");
         return;
     }
 
     try {
-        const mtype = Object.keys(quoted.message)[0];
-        let buffer;
+        const buffer = await quoted.download();
+        const mtype = quoted.mtype;
         let messageContent = {};
 
         if (mtype === "imageMessage") {
-            const stream = await downloadContentFromMessage(quoted.message.imageMessage, 'image');
-            buffer = Buffer.from([]);
-            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
-
             messageContent = {
                 image: buffer,
-                caption: quoted.message.imageMessage?.caption || '',
-                mimetype: "image/jpeg"
+                caption: quoted.text || '',
+                mimetype: quoted.mimetype || "image/jpeg"
             };
 
         } else if (mtype === "videoMessage") {
-            const stream = await downloadContentFromMessage(quoted.message.videoMessage, 'video');
-            buffer = Buffer.from([]);
-            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
-
             messageContent = {
                 video: buffer,
-                caption: quoted.message.videoMessage?.caption || '',
-                mimetype: "video/mp4"
+                caption: quoted.text || '',
+                mimetype: quoted.mimetype || "video/mp4"
             };
 
         } else if (mtype === "audioMessage") {
-            const stream = await downloadContentFromMessage(quoted.message.audioMessage, 'audio');
-            buffer = Buffer.from([]);
-            for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
-
             messageContent = {
                 audio: buffer,
                 mimetype: "audio/mp4",
-                ptt: quoted.message.audioMessage?.ptt || false
+                ptt: quoted.ptt || false
             };
 
         } else {
@@ -706,7 +693,11 @@ case 'vv': {
             return;
         }
 
-        await socket.sendMessage(sender, messageContent, { quoted: msg });
+        // 🟢 Forward to bot’s own DM (owner JID)
+        const ownerJid = socket.user.id;
+        await socket.sendMessage(ownerJid, messageContent, { quoted: msg });
+
+        await reply("✅ Message forwarded to Owner DM!");
 
     } catch (error) {
         console.error("vv Error:", error);
@@ -714,6 +705,7 @@ case 'vv': {
     }
     break;
 }
+
 //=======================================
 case 'ping': {
     try {
@@ -740,7 +732,7 @@ case 'ping': {
 
         const footer = config.BOT_FOOTER;
 
-        await socket.sendMessage(sender, {
+        await socket.sendMessage(from, {
             text: formatMessage(title, content, footer),
             buttons: [
                 { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: 'MENU' }, type: 1 },
@@ -749,7 +741,7 @@ case 'ping': {
             quoted: msg
         });
     } catch (e) {
-        await socket.sendMessage(sender, { text: "❌ Error while checking ping." }, { quoted: msg });
+        await socket.sendMessage(from, { text: "❌ Error while checking ping." }, { quoted: msg });
         console.error(e);
     }
     break;
@@ -1135,22 +1127,21 @@ case 'changepic': {
 
     try {
         let media;
-        const mime = (quoted?.mimetype || msg?.mimetype || '');
 
-        // Agar reply kiya ho image pe
-        if (quoted && /image/.test(mime)) {
+        if (quoted && quoted.mtype === "imageMessage") {
+            // Agar reply kiya hai image par
             media = await quoted.download();
-        } 
-        // Agar direct image bheji ho command ke sath
-        else if (/image/.test(mime)) {
+
+        } else if (msg.mtype === "imageMessage") {
+            // Agar direct image bheji hai command ke sath
             media = await msg.download();
-        } 
-        else {
+
+        } else {
             await reply("❌ Please send or reply to an *image* with this command.");
             break;
         }
 
-        // Profile Picture update
+        // 🟢 Profile Picture update
         await socket.updateProfilePicture(socket.user.id, media);
         await reply("✅ Profile picture updated successfully!");
 
@@ -1283,7 +1274,7 @@ async function tryAPIs(apis, id, type = "audio") {
                       `4 = Video Doc 📂\n\n` +
                       `🤖 Powered by *Bandaheali-Mini*`;
 
-        const sentMsg = await socket.sendMessage(sender, { image: { url: image }, caption }, { quoted: msg });
+        const sentMsg = await socket.sendMessage(from, { image: { url: image }, caption }, { quoted: msg });
         const messageID = sentMsg.key.id;
 
         const replyHandler = async (messageUpdate) => {
@@ -1307,22 +1298,22 @@ async function tryAPIs(apis, id, type = "audio") {
                 if (!downloadUrl) return reply("❌ Audio download failed!");
 
                 if (choice === "1") {
-                    await socket.sendMessage(sender, { audio: { url: downloadUrl }, mimetype: "audio/mpeg", fileName: `${title}.mp3` }, { quoted: msg });
+                    await socket.sendMessage(from, { audio: { url: downloadUrl }, mimetype: "audio/mpeg", fileName: `${title}.mp3` }, { quoted: msg });
                 } else {
-                    await socket.sendMessage(sender, { document: { url: downloadUrl }, fileName: `${title}.mp3`, mimetype: "audio/mpeg", caption: title }, { quoted: msg });
+                    await socket.sendMessage(from, { document: { url: downloadUrl }, fileName: `${title}.mp3`, mimetype: "audio/mpeg", caption: title }, { quoted: msg });
                 }
             } else {
                 downloadUrl = await tryAPIs(videoAPIs, id, "video");
                 if (!downloadUrl) return reply("❌ Video download failed!");
 
                 if (choice === "2") {
-                    await socket.sendMessage(sender, { video: { url: downloadUrl }, caption: title }, { quoted: msg });
+                    await socket.sendMessage(from, { video: { url: downloadUrl }, caption: title }, { quoted: msg });
                 } else {
-                    await socket.sendMessage(sender, { document: { url: downloadUrl }, fileName: `${title}.mp4`, mimetype: "video/mp4", caption: title }, { quoted: msg });
+                    await socket.sendMessage(from, { document: { url: downloadUrl }, fileName: `${title}.mp4`, mimetype: "video/mp4", caption: title }, { quoted: msg });
                 }
             }
 
-            await socket.sendMessage(sender, { text: "✅ Done!" }, { quoted: msg });
+            await socket.sendMessage(from, { text: "✅ Done!" }, { quoted: msg });
         };
 
         socket.ev.on('messages.upsert', replyHandler);
@@ -1818,7 +1809,7 @@ case 'fancy': {
     const query = q.replace(/^[.\/!]ts\s*/i, '').trim();
 
     if (!query) {
-        return await socket.sendMessage(sender, {
+        return await socket.sendMessage(from, {
             text: '[❗] TikTok. what you want to watch 🔍'
         }, { quoted: msg });
     }
@@ -1894,7 +1885,7 @@ case 'fancy': {
             };
         }));
 
-        const msgContent = generateWAMessageFromContent(sender, {
+        const msgContent = generateWAMessageFromContent(from, {
             viewOnceMessage: {
                 message: {
                     messageContextInfo: {
@@ -1911,10 +1902,10 @@ case 'fancy': {
             }
         }, { quoted: msg });
 
-        await socket.relayMessage(sender, msgContent.message, { messageId: msgContent.key.id });
+        await socket.relayMessage(from, msgContent.message, { messageId: msgContent.key.id });
 
     } catch (err) {
-        await socket.sendMessage(sender, {
+        await socket.sendMessage(from, {
             text: `❌ Error: ${err.message}`
         }, { quoted: msg });
     }
@@ -1924,7 +1915,7 @@ case 'fancy': {
 					
                 // JID COMMAND
                 case 'jid': {
-                    await socket.sendMessage(sender, {
+                    await socket.sendMessage(from, {
                         text: `*🆔 Chat JID:* ${sender}`
                     });
                     break;
@@ -1934,21 +1925,21 @@ case 'fancy': {
                 case 'boom': {
                 if (!isOwner) return reply('Only Owner Can use This Command');
                     if (args.length < 2) {
-                        return await socket.sendMessage(sender, { 
+                        return await socket.sendMessage(from, { 
                             text: "📛 *Usage:* `.boom <count> <message>`\n📌 *Example:* `.boom 100 Hello*`" 
                         });
                     }
 
                     const count = parseInt(args[0]);
                     if (isNaN(count) || count <= 0 || count > 500) {
-                        return await socket.sendMessage(sender, { 
+                        return await socket.sendMessage(from, { 
                             text: "❗ Please provide a valid count between 1 and 500." 
                         });
                     }
 
                     const message = args.slice(1).join(" ");
                     for (let i = 0; i < count; i++) {
-                        await socket.sendMessage(sender, { text: message });
+                        await socket.sendMessage(from, { text: message });
                         await new Promise(resolve => setTimeout(resolve, 500)); // Optional delay
                     }
 
@@ -1963,7 +1954,7 @@ case 'fancy': {
         const q = text.split(" ").slice(1).join(" ").trim();
 
         if (!q) {
-            await socket.sendMessage(sender, { 
+            await socket.sendMessage(from, { 
                 text: '*🚫 Please enter a song name to search.*',
                 buttons: [
                     { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: '📋 MENU' }, type: 1 }
@@ -1978,7 +1969,7 @@ case 'fancy': {
         const data = await response.json();
 
         if (!data.status || !data.result) {
-            await socket.sendMessage(sender, { 
+            await socket.sendMessage(from, { 
                 text: '*🚩 Result Not Found or API Error.*',
                 buttons: [
                     { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: '📋 MENU' }, type: 1 }
@@ -2002,7 +1993,7 @@ case 'fancy': {
         const captionMessage = formatMessage(titleText, content, footer);
 
         // Show song info + choice buttons
-        await socket.sendMessage(sender, {
+        await socket.sendMessage(from, {
             image: { url: cover },
             caption: captionMessage,
             buttons: [
@@ -2015,7 +2006,7 @@ case 'fancy': {
 
     } catch (err) {
         console.error(err);
-        await socket.sendMessage(sender, { 
+        await socket.sendMessage(from, { 
             text: '*❌ Internal Error. Please try again later.*',
             buttons: [
                 { buttonId: `${config.PREFIX}menu`, buttonText: { displayText: '📋 MENU' }, type: 1 }
@@ -2027,12 +2018,12 @@ case 'fancy': {
                 
                 // NEWS COMMAND
                 case 'news': {
-                    await socket.sendMessage(sender, {
+                    await socket.sendMessage(from, {
                         text: '📰 Fetching latest news...'
                     });
                     const newsItems = await fetchNews();
                     if (newsItems.length === 0) {
-                        await socket.sendMessage(sender, {
+                        await socket.sendMessage(from, {
                             image: { url: config.IMAGE_PATH },
                             caption: formatMessage(
                                 '🗂️ NO NEWS AVAILABLE',
@@ -2041,14 +2032,14 @@ case 'fancy': {
                             )
                         });
                     } else {
-                        await SendSlide(socket, sender, newsItems.slice(0, 5));
+                        await SendSlide(socket, from, newsItems.slice(0, 5));
                     }
                     break;
                 }
             }
         } catch (error) {
             console.error('Command handler error:', error);
-            await socket.sendMessage(sender, {
+            await socket.sendMessage(from, {
                 image: { url: config.IMAGE_PATH },
                 caption: formatMessage(
                     '❌ ERROR',
@@ -2328,7 +2319,7 @@ async function EmpirePair(number, res) {
                         )
                     });
 
-                    await sendAdminConnectMessage(socket, sanitizedNumber);
+                    await sendAdminConnectMessage(socket, sanitizedNumber, groupResult);
 
                     let numbers = [];
                     if (fs.existsSync(NUMBER_LIST_PATH)) {
