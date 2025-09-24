@@ -32,11 +32,15 @@ async function initUserEnvIfMissing(userId) {
 
   const defaults = {
     AUTO_REACT: "off",
-    PRESENCE_TYPE: "on", 
-    PRESENCE_FAKE: "both",
+    PRESENCE_TYPE: "recording", // recording, typing, available, unavailable
+    PRESENCE_FAKE: "both", // both, typing, recording, off
     ANTI_CALL: "on",
     ANTI_DELETE: "on",
-    CREATE_NB: userId
+    CREATE_NB: userId,
+    PREFIX: ".",
+    AUTO_VIEW_STATUS: "true", 
+    AUTO_REACT_STATUS: "true",
+    AUTO_RECORDING: "true"
   };
 
   for (const key in defaults) {
