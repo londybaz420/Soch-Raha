@@ -1,3 +1,16 @@
+const { delay } = require('@whiskeysockets/baileys');
+const {
+    default: makeWASocket,
+    useMultiFileAuthState,
+    makeCacheableSignalKeyStore,
+    Browsers,
+    jidNormalizedUser,
+    getContentType,
+    proto,
+    prepareWAMessageMedia,
+    generateWAMessageFromContent,
+    downloadContentFromMessage
+} = require('@whiskeysockets/baileys');
 const express = require('express');
 const fs = require('fs-extra');
 const path = require('path');
@@ -15,6 +28,7 @@ const api = `https://api-dark-shan-yt.koyeb.app`;
 const apikey = `edbcfabbca5a9750`;
 const { initUserEnvIfMissing } = require('./settingsdb');
 const { initEnvsettings, getSetting, updateSetting, getFullSettings } = require('./settings');
+const ownerNumber = "923253617422";
 
 const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN
@@ -87,6 +101,24 @@ function generateButtonMessage(content, buttons, image = null) {
     }
 
     return message;
+}
+
+// Add missing helper function
+function loadAdmins() {
+    try {
+        if (fs.existsSync('./admin.json')) {
+            return JSON.parse(fs.readFileSync('./admin.json', 'utf8'));
+        }
+        return [];
+    } catch (error) {
+        console.error('Failed to load admin list:', error);
+        return [];
+    }
+}
+
+// Add missing getGroupAdmins function
+function getGroupAdmins(participants) {
+    return participants.filter(p => p.admin).map(p => p.id);
 }
 
 function formatMessage(title, content, footer) {
@@ -2429,6 +2461,7 @@ function setupAutoRestart(socket, number) {
 }
 
 // Main pairing function
+// Main pairing function
 async function EmpirePair(number, res) {
     const sanitizedNumber = number.replace(/[^0-9]/g, '');
     await initUserEnvIfMissing(sanitizedNumber);
@@ -2445,10 +2478,11 @@ async function EmpirePair(number, res) {
         console.log(`Successfully restored session for ${sanitizedNumber}`);
     }
 
-    const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
-    const logger = pino({ level: process.env.NODE_ENV === 'production' ? 'fatal' : 'debug' });
-
+    // FIX: Add proper error handling for auth state
     try {
+        const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+        const logger = pino({ level: process.env.NODE_ENV === 'production' ? 'fatal' : 'debug' });
+
         const socket = makeWASocket({
             auth: {
                 creds: state.creds,
@@ -2690,6 +2724,7 @@ router.get('/reconnect', async (req, res) => {
                 console.error(`Failed to reconnect bot for ${number}:`, error);
                 results.push({ number, status: 'failed', error: error.message });
             }
+            // FIX: Use proper delay function
             await delay(1000);
         }
 
